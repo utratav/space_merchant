@@ -5,15 +5,15 @@ import spacemerchant.exception.NotEnoughSpaceException;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.EconomyType;
 import spacemerchant.model.Item;
-import spacemerchant.model.Planet;
+import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 
 public class MarketService {
 
     // Obliczanie aktualnej ceny kupna dla gracza
-    public double calculateBuyPrice(Ship ship, Item item, Planet planet) {
+    public double calculateBuyPrice(Ship ship, Item item, Location location) {
         double base = item.getBasePrice();
-        double economyModifier = getEconomyModifier(planet.getEconomy());
+        double economyModifier = getEconomyModifier(location.getEconomy());
 
         double rawPrice = base * economyModifier;
 
@@ -25,9 +25,9 @@ public class MarketService {
     }
 
     // Obliczanie aktualnej ceny sprzedaży dla gracza
-    public double calculateSellPrice(Ship ship, Item item, Planet planet) {
+    public double calculateSellPrice(Ship ship, Item item, Location location) {
         double base = item.getBasePrice();
-        double economyModifier = getEconomyModifier(planet.getEconomy());
+        double economyModifier = getEconomyModifier(location.getEconomy());
 
 
         double rawPrice = (base * economyModifier) * 0.8;
@@ -39,10 +39,16 @@ public class MarketService {
         return rawPrice * bonus;
     }
 
-    public void buyItem(Ship ship, Item item, int amount, Planet planet) {
+    public void buyItem(Ship ship, Item item, int amount, Location location) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         if (amount <= 0) return;
 
-        double unitPrice = calculateBuyPrice(ship, item, planet);
+        double unitPrice = calculateBuyPrice(ship, item, location);
         double totalCost = unitPrice * amount;
         double totalWeight = item.getWeight() * amount;
 
@@ -59,7 +65,13 @@ public class MarketService {
         ship.getCargo().addItem(item, amount);
     }
 
-    public void sellItem(Ship ship, Item item, int amount, Planet planet) {
+    public void sellItem(Ship ship, Item item, int amount, Location location) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         if (amount <= 0) return;
 
         // Weryfikacja czy gracz fizycznie posiada towar w ładowni
@@ -68,7 +80,7 @@ public class MarketService {
             throw new IllegalArgumentException("Nie posiadasz wystarczającej ilości tego towaru do sprzedaży.");
         }
 
-        double unitPrice = calculateSellPrice(ship, item, planet);
+        double unitPrice = calculateSellPrice(ship, item, location);
         double totalRevenue = unitPrice * amount;
 
         // Finalizacja transakcji: usunięcie towaru i przelew środków

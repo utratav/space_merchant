@@ -2,20 +2,20 @@ package spacemerchant.controller;
 
 import spacemerchant.model.EconomyType;
 import spacemerchant.model.Item;
-import spacemerchant.model.Planet;
+import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import java.util.Scanner;
 
 public class GameEngine {
     private Ship playerShip;
-    private Planet startingPlanet;
+    private Location startingLocation;
     private Item testItem;
 
     public GameEngine() {
-        this.startingPlanet = new Planet("Ziemia", 0, 0, EconomyType.INDUSTRIAL);
+        this.startingLocation = new Location("Ziemia", 0, 0, EconomyType.INDUSTRIAL,true);
         this.testItem = new Item("WOD", "Woda", 10.0, 1.0);
 
-        this.playerShip = new Ship("Prometeusz", 1000.0, 100.0, 50.0, startingPlanet, 100, 4, 1);
+        this.playerShip = new Ship("Prometeusz", 1000.0, 100.0, 50.0, startingLocation, 100, 4, 1);
     }
 
     public void start() {

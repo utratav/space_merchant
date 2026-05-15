@@ -10,7 +10,7 @@ public class Ship {
     private double maxFuel;
     private double maxCargoWeight;
     private Inventory cargo;
-    private Planet currentLocation;
+    private Location currentLocation;
     private int currentHp;
     private int maxHp;
     private int maxCrew;
@@ -18,7 +18,7 @@ public class Ship {
     private List<ShipUpgrade> activeUpgrades;
     private List<CrewMember> crew;
 
-    public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Planet currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
+    public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Location currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this.name = name;
         this.credits = credits;
         this.maxFuel = maxFuel;
@@ -96,11 +96,11 @@ public class Ship {
         return cargo;
     }
 
-    public Planet getCurrentLocation() {
+    public Location getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(Planet currentLocation) {
+    public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
     }
 
@@ -144,4 +144,8 @@ public class Ship {
     public void setFuelPerTurn(double fuelPerTurn) {
         this.fuelPerTurn = fuelPerTurn;
     }
+
+    public void setMaxFuel(double maxFuel) {this.maxFuel = maxFuel;}
+
+    public void setMaxCargoWeight(double maxCargoWeight) {this.maxCargoWeight = maxCargoWeight;}
 }
