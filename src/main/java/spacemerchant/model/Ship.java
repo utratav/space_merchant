@@ -16,6 +16,7 @@ public class Ship {
     private int maxCrew;
     private double fuelPerTurn;
     private List<ShipUpgrade> activeUpgrades;
+    private List<CrewMember> crew;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Planet currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this.name = name;
@@ -30,6 +31,7 @@ public class Ship {
         this.maxCrew = maxCrew;
         this.fuelPerTurn = fuelPerTurn;
         this.activeUpgrades = new ArrayList<>();
+        this.crew = new ArrayList<>();
     }
 
     public boolean hasEnoughCredits(double amount) {
@@ -47,6 +49,10 @@ public class Ship {
     public List<ShipUpgrade> getActiveUpgrades() {
         return activeUpgrades;
     }
+
+    public List<CrewMember> getCrew() {return crew;}
+
+    public void addCrewMember(CrewMember member) {this.crew.add(member);}
 
     public String getName() {
         return name;
