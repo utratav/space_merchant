@@ -8,6 +8,12 @@ import spacemerchant.model.Ship;
 public class CrewService {
 
     public void recruitMember(Ship ship, CrewMember member, double recruitmentCost) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         // Sprawdzenie limitu miejsc
         if (ship.getCrew().size() >= ship.getMaxCrew()) {
             throw new CrewFullException("Brak wolnych koi na statku. Maksymalna załoga: " + ship.getMaxCrew());
@@ -27,6 +33,12 @@ public class CrewService {
 
      // Leczy członka załogi do pełnego poziomu HP.
     public void healCrewMember(Ship ship, CrewMember member, double cost) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         if (!ship.hasEnoughCredits(cost)) {
             throw new NotEnoughCreditsException("Brak kredytów na leczenie w ambulatorium.");
         }

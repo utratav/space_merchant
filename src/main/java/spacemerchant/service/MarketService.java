@@ -40,6 +40,12 @@ public class MarketService {
     }
 
     public void buyItem(Ship ship, Item item, int amount, Planet planet) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         if (amount <= 0) return;
 
         double unitPrice = calculateBuyPrice(ship, item, planet);
@@ -60,6 +66,12 @@ public class MarketService {
     }
 
     public void sellItem(Ship ship, Item item, int amount, Planet planet) {
+
+        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
+        if (ship.getCurrentLocation() == null) {
+            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
+        }
+
         if (amount <= 0) return;
 
         // Weryfikacja czy gracz fizycznie posiada towar w ładowni

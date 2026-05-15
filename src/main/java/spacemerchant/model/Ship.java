@@ -144,4 +144,8 @@ public class Ship {
     public void setFuelPerTurn(double fuelPerTurn) {
         this.fuelPerTurn = fuelPerTurn;
     }
+
+    public void setMaxFuel(double maxFuel) {this.maxFuel = maxFuel;}
+
+    public void setMaxCargoWeight(double maxCargoWeight) {this.maxCargoWeight = maxCargoWeight;}
 }
