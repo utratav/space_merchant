@@ -8,8 +8,12 @@ public class Ship {
     private double maxCargoWeight;
     private Inventory cargo;
     private Planet currentLocation;
+    private int currentHp;
+    private int maxHp;
+    private int maxCrew;
+    private double fuelPerTurn;
 
-    public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Planet currentLocation) {
+    public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Planet currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this.name = name;
         this.credits = credits;
         this.maxFuel = maxFuel;
@@ -17,9 +21,11 @@ public class Ship {
         this.maxCargoWeight = maxCargoWeight;
         this.currentLocation = currentLocation;
         this.cargo = new Inventory();
+        this.maxHp = maxHp;
+        this.currentHp = maxHp;
+        this.maxCrew = maxCrew;
+        this.fuelPerTurn = fuelPerTurn;
     }
-
-
 
     public boolean hasEnoughCredits(double amount) {
         return this.credits >= amount;
@@ -28,8 +34,6 @@ public class Ship {
     public boolean hasAvailableCargoSpace(double additionalWeight) {
         return (this.cargo.getTotalWeight() + additionalWeight) <= this.maxCargoWeight;
     }
-
-    
 
     public String getName() {
         return name;
@@ -79,5 +83,46 @@ public class Ship {
 
     public void setCurrentLocation(Planet currentLocation) {
         this.currentLocation = currentLocation;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
+        if (this.currentHp > this.maxHp) {
+            this.currentHp = this.maxHp;
+        }
+    }
+
+    public int getCurrentHp() {
+        return currentHp;
+    }
+
+    public void setCurrentHp(int currentHp) {
+        if (currentHp < 0) {
+            this.currentHp = 0;
+        } else if (currentHp > this.maxHp) {
+            this.currentHp = this.maxHp;
+        } else {
+            this.currentHp = currentHp;
+        }
+    }
+
+    public int getMaxCrew() {
+        return maxCrew;
+    }
+
+    public void setMaxCrew(int maxCrew) {
+        this.maxCrew = maxCrew;
+    }
+
+    public double getFuelPerTurn() {
+        return fuelPerTurn;
+    }
+
+    public void setFuelPerTurn(double fuelPerTurn) {
+        this.fuelPerTurn = fuelPerTurn;
     }
 }
