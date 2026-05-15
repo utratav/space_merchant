@@ -15,7 +15,7 @@ public class GameEngine {
         this.startingPlanet = new Planet("Ziemia", 0, 0, EconomyType.INDUSTRIAL);
         this.testItem = new Item("WOD", "Woda", 10.0, 1.0);
 
-        this.playerShip = new Ship("Prometeusz", 1000.0, 100.0, 50.0, startingPlanet);
+        this.playerShip = new Ship("Prometeusz", 1000.0, 100.0, 50.0, startingPlanet, 100, 4, 1);
     }
 
     public void start() {
