@@ -1,5 +1,8 @@
 package spacemerchant.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Ship {
     private String name;
     private double credits;
@@ -12,6 +15,7 @@ public class Ship {
     private int maxHp;
     private int maxCrew;
     private double fuelPerTurn;
+    private List<ShipUpgrade> activeUpgrades;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Planet currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this.name = name;
@@ -25,6 +29,7 @@ public class Ship {
         this.currentHp = maxHp;
         this.maxCrew = maxCrew;
         this.fuelPerTurn = fuelPerTurn;
+        this.activeUpgrades = new ArrayList<>();
     }
 
     public boolean hasEnoughCredits(double amount) {
@@ -33,6 +38,14 @@ public class Ship {
 
     public boolean hasAvailableCargoSpace(double additionalWeight) {
         return (this.cargo.getTotalWeight() + additionalWeight) <= this.maxCargoWeight;
+    }
+
+    public void addUpgrade(ShipUpgrade upgrade) {
+        this.activeUpgrades.add(upgrade);
+    }
+
+    public List<ShipUpgrade> getActiveUpgrades() {
+        return activeUpgrades;
     }
 
     public String getName() {
