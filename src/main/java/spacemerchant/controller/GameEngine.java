@@ -6,6 +6,7 @@ import spacemerchant.model.EconomyType;
 import spacemerchant.model.Item;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
+import spacemerchant.view.CockpitWindow;
 
 public class GameEngine {
     private GuiManager guiManager;
@@ -24,10 +25,7 @@ public class GameEngine {
 
     public void start() {
 
-        Window mainWindow = new BasicWindow("Space Merchant - Kokpit");
-
-        guiManager.showWindow(mainWindow);
-
-        guiManager.stop();
+        guiManager.showWindow(new CockpitWindow(guiManager, playerShip));
+        guiManager.stop();;
     }
 }

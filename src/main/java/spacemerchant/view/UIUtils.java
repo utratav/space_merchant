@@ -20,7 +20,7 @@ public class UIUtils {
                 "░".repeat(Math.max(0, emptyLength)) +
                 "]";
     }
-    
+
     public static String drawStars(int level) {
         int maxStars = 5;
 
