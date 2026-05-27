@@ -1,46 +1,47 @@
 package spacemerchant.service;
 
-import spacemerchant.exception.NotEnoughFuelException;
+import spacemerchant.controller.GuiManager;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
+import spacemerchant.service.events.EncounterEvent;
+import spacemerchant.service.events.PirateAttackEvent;
+import spacemerchant.view.EncounterDialog;
+
+import java.util.Random;
 
 public class NavigationService {
-
     private CrewService crewService;
+    private Random random;
 
     public NavigationService(CrewService crewService) {
         this.crewService = crewService;
+        this.random = new Random();
     }
 
-    public void travel(Ship ship, Location destination) {
-        Location current = ship.getCurrentLocation();
+    // Dodano GuiManager do parametrów metody!
+    public void travel(Ship ship, Location destination, GuiManager guiManager) {
+        double cost = ship.getCurrentLocation().getConnectedPaths().getOrDefault(destination, -1.0);
 
-        if (current != null && current.equals(destination)) {
-            throw new IllegalArgumentException("Kapitanie, już znajdujemy się na orbicie tej lokacji!");
+        if (cost < 0) {
+            throw new RuntimeException("Brak bezpośredniego szlaku do tego systemu!");
+        }
+        if (ship.getCurrentFuel() < cost) {
+            throw new RuntimeException("Za mało paliwa na ten skok!");
         }
 
-        // Sprawdzenie istnieje wyznaczony szlak z obecnego miejsca do celu
-        if (!current.getConnectedPaths().containsKey(destination)) {
-            throw new IllegalArgumentException("Brak szlaku nadprzestrzennego łączącego te dwa systemy!");
-        }
-
-        // Pobranie kosztu paliwa dla wybranej trasy
-        double fuelCost = current.getConnectedPaths().get(destination);
-
-        // Walidacja paliwa
-        if (ship.getCurrentFuel() < fuelCost) {
-            throw new NotEnoughFuelException(String.format("Brak paliwa na wykonanie skoku. Wymagane: %.2f j.", fuelCost));
-        }
-
-        // Odlot
-        ship.setCurrentLocation(null);
-
-        // Pobranie paliwa
-        ship.setCurrentFuel(ship.getCurrentFuel() - fuelCost);
-
+        // Logika biznesowa: Opłaty, spalanie paliwa i zmiana lokacji
         crewService.paySalaries(ship);
-
-        // Przylot
+        ship.setCurrentFuel(ship.getCurrentFuel() - cost);
         ship.setCurrentLocation(destination);
+
+        // --- MECHANIKA ZDARZEŃ LOSOWYCH ---
+        // Generujemy 35% szansy na napotkanie zdarzenia po drodze
+        if (random.nextDouble() < 0.35) {
+            // W przyszłości można tu wylosować event z całej listy. Na razie dajemy Piratów.
+            EncounterEvent randomEvent = new PirateAttackEvent();
+
+            // Wrzucamy okno awaryjne na ekran
+            guiManager.showWindow(new EncounterDialog(guiManager, ship, randomEvent));
+        }
     }
 }
