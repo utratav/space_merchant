@@ -36,16 +36,16 @@ public class CrewRecruitFactory {
     );
 
     private static final List<RoleTemplate> ROLE_TEMPLATES = List.of(
-            new RoleTemplate("Pilot", 95, 55, 5, 2, 2, 2),
-            new RoleTemplate("Nawigator", 90, 50, 4, 2, 3, 2),
-            new RoleTemplate("Inzynier", 105, 60, 2, 2, 5, 1),
-            new RoleTemplate("Mechanik", 110, 55, 2, 3, 4, 1),
-            new RoleTemplate("Handlarz", 85, 65, 2, 1, 1, 5),
-            new RoleTemplate("Negocjator", 85, 60, 2, 2, 1, 4),
-            new RoleTemplate("Strzelec", 115, 60, 2, 5, 1, 1),
-            new RoleTemplate("Ochroniarz", 125, 55, 1, 4, 2, 1),
-            new RoleTemplate("Technik", 100, 55, 3, 2, 4, 1),
-            new RoleTemplate("Medyk", 95, 50, 1, 2, 3, 3)
+            new RoleTemplate("Pilot", 95, 28, 5, 2, 2, 2),
+            new RoleTemplate("Nawigator", 90, 24, 4, 2, 3, 2),
+            new RoleTemplate("Inzynier", 105, 27, 2, 2, 5, 1),
+            new RoleTemplate("Mechanik", 110, 25, 2, 3, 4, 1),
+            new RoleTemplate("Handlarz", 85, 30, 2, 1, 1, 5),
+            new RoleTemplate("Negocjator", 85, 27, 2, 2, 1, 4),
+            new RoleTemplate("Strzelec", 115, 28, 2, 5, 1, 1),
+            new RoleTemplate("Ochroniarz", 125, 26, 1, 4, 2, 1),
+            new RoleTemplate("Technik", 100, 24, 3, 2, 4, 1),
+            new RoleTemplate("Medyk", 95, 23, 1, 2, 3, 3)
     );
 
     private final Random random;
@@ -109,7 +109,7 @@ public class CrewRecruitFactory {
 
     private CrewMember createRecruit(String fullName, RoleTemplate template) {
         int maxHp = template.maxHp() + random.nextInt(21) - 10;
-        int salary = template.salary() + random.nextInt(21) - 10;
+        int salary = template.salary() + random.nextInt(7) - 3;
         int piloting = tweakSkill(template.piloting());
         int combat = tweakSkill(template.combat());
         int engineering = tweakSkill(template.engineering());

@@ -4,7 +4,13 @@ import spacemerchant.exception.CrewFullException;
 import spacemerchant.exception.NotEnoughCreditsException;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.CrewSkill;
+import spacemerchant.model.Item;
 import spacemerchant.model.Ship;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class CrewService {
     public static final String ROLE_PILOT = "Pilot";
@@ -16,6 +22,7 @@ public class CrewService {
     public static final String ROLE_NEGOTIATOR = "Negocjator";
     public static final String ROLE_GUNNER = "Strzelec";
     public static final String ROLE_GUARD = "Ochroniarz";
+    private final Random random = new Random();
 
     public void recruitMember(Ship ship, CrewMember member, double recruitmentCost) {
         ensureStationServiceAvailable(ship);
@@ -85,6 +92,88 @@ public class CrewService {
 
             ship.setCredits(newBalance);
         }
+
+        if (!ship.isDefeated()) {
+            resolveDebtMorale(ship);
+        }
+    }
+
+    private void resolveDebtMorale(Ship ship) {
+        if (ship.getCredits() >= 0 || ship.getCrew().isEmpty()) {
+            ship.clearCrewIncidentMessage();
+            return;
+        }
+
+        double debtPressure = Math.min(0.75, Math.abs(ship.getCredits()) / 650.0);
+        if (random.nextDouble() > 0.25 + debtPressure) {
+            ship.setCrewIncidentMessage("Załoga narzeka na zaległy żołd. Na razie utrzymujesz dyscyplinę.");
+            return;
+        }
+
+        int event = random.nextInt(4);
+        switch (event) {
+            case 0 -> damageShipDuringMutiny(ship);
+            case 1 -> injureCrewDuringMutiny(ship);
+            case 2 -> dumpCargoDuringMutiny(ship);
+            default -> crewMemberLeaves(ship);
+        }
+    }
+
+    private void damageShipDuringMutiny(Ship ship) {
+        int damage = 5 + random.nextInt(16);
+        ship.setCurrentHp(ship.getCurrentHp() - damage);
+        ship.setCrewIncidentMessage("Bunt załogi: ktoś sabotował instalację. Kadłub -" + damage + " HP.");
+    }
+
+    private void injureCrewDuringMutiny(Ship ship) {
+        CrewMember victim = randomCrewMember(ship);
+        if (victim == null) {
+            ship.clearCrewIncidentMessage();
+            return;
+        }
+
+        int damage = 10 + random.nextInt(21);
+        victim.setHp(victim.getHp() - damage);
+        ship.setCrewIncidentMessage("Bunt załogi: bójka na pokładzie. " + victim.getName() + " traci " + damage + " HP.");
+    }
+
+    private void dumpCargoDuringMutiny(Ship ship) {
+        List<Map.Entry<Item, Integer>> cargoEntries = new ArrayList<>(ship.getCargo().getItems().entrySet());
+        if (cargoEntries.isEmpty()) {
+            damageShipDuringMutiny(ship);
+            return;
+        }
+
+        Map.Entry<Item, Integer> entry = cargoEntries.get(random.nextInt(cargoEntries.size()));
+        int removedAmount = 1 + random.nextInt(Math.max(1, entry.getValue()));
+        ship.getCargo().removeItem(entry.getKey(), removedAmount);
+        ship.setCrewIncidentMessage("Bunt załogi: część ładunku wyrzucono za burtę. Strata: "
+                + entry.getKey().getName() + " x" + removedAmount + ".");
+    }
+
+    private void crewMemberLeaves(Ship ship) {
+        if (ship.getCrew().size() <= 1) {
+            injureCrewDuringMutiny(ship);
+            return;
+        }
+
+        CrewMember deserter = ship.getCrew().remove(random.nextInt(ship.getCrew().size()));
+        ship.setCrewIncidentMessage("Bunt załogi: " + deserter.getName() + " opuszcza statek przy najbliższym śluzie.");
+    }
+
+    private CrewMember randomCrewMember(Ship ship) {
+        List<CrewMember> livingCrew = new ArrayList<>();
+        for (CrewMember member : ship.getCrew()) {
+            if (isAlive(member)) {
+                livingCrew.add(member);
+            }
+        }
+
+        if (livingCrew.isEmpty()) {
+            return null;
+        }
+
+        return livingCrew.get(random.nextInt(livingCrew.size()));
     }
 
     public boolean hasLivingCrewWithRole(Ship ship, String requiredRole) {

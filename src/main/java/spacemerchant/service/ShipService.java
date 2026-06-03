@@ -55,6 +55,31 @@ public class ShipService {
         crewService.grantEngineeringExperience(ship, 10);
     }
 
+    public void repairHull(Ship ship, int amount, double unitPrice) {
+        if (ship.getCurrentLocation() == null || !ship.getCurrentLocation().hasStation()) {
+            throw new IllegalStateException("Naprawa kadłuba jest dostępna wyłącznie w porcie.");
+        }
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Podaj liczbę punktów kadłuba większą od zera.");
+        }
+
+        int missingHp = ship.getMaxHp() - ship.getCurrentHp();
+        int hpToRepair = Math.min(amount, missingHp);
+        if (hpToRepair <= 0) {
+            throw new IllegalArgumentException("Kadłub jest już w pełni sprawny.");
+        }
+
+        double totalCost = hpToRepair * unitPrice;
+        if (!ship.hasEnoughCredits(totalCost)) {
+            throw new NotEnoughCreditsException("Brak kredytów na naprawę. Potrzeba: " + totalCost);
+        }
+
+        ship.setCredits(ship.getCredits() - totalCost);
+        ship.setCurrentHp(ship.getCurrentHp() + hpToRepair);
+        crewService.grantEngineeringExperience(ship, 15);
+    }
+
     public boolean isCurrentModel(Ship ship, ShipModel model) {
         if (ship.getShipModel() == null || model == null) {
             return false;

@@ -3,6 +3,8 @@ package spacemerchant.model;
 public class CrewMember {
     private static final int MAX_SKILL = 5;
     private static final int EXPERIENCE_PER_SKILL_UP = 100;
+    private static final int MIN_SALARY = 20;
+    private static final int MAX_SALARY = 30;
 
     private String name;
     private String role;
@@ -23,7 +25,7 @@ public class CrewMember {
         this.role = role;
         this.maxHp = maxHp;
         this.hp = maxHp;
-        this.salary = salary;
+        setSalary(salary);
         this.piloting = piloting;
         this.combat = combat;
         this.engineering = engineering;
@@ -80,7 +82,7 @@ public class CrewMember {
     }
 
     public void setSalary(int salary) {
-        this.salary = salary;
+        this.salary = Math.max(MIN_SALARY, Math.min(MAX_SALARY, salary));
     }
 
     public int getPiloting() {

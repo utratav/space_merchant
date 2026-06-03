@@ -80,6 +80,11 @@ public class CockpitWindow extends BasicWindow {
             actionMenuPanel.addComponent(new Label(message));
         }
 
+        if (!ship.getCrewIncidentMessage().isEmpty()) {
+            actionMenuPanel.addComponent(new EmptySpace());
+            actionMenuPanel.addComponent(new Label("INCYDENT: " + ship.getCrewIncidentMessage()));
+        }
+
         rootPanel.addComponent(actionMenuPanel.withBorder(Borders.singleLine("WYBIERZ AKCJĘ")));
 
         // --- PRAWY PANEL: STATUS POKŁADOWY ---

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Ship {
+    private static final double DEBT_DEFEAT_LIMIT = -500.0;
+
     private ShipModel shipModel;
     private String name;
     private double credits;
@@ -20,6 +22,7 @@ public class Ship {
     private List<CrewMember> crew;
     private boolean defeated;
     private String defeatReason;
+    private String crewIncidentMessage;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Location currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this(new ShipModel("custom", name, "Niestandardowy model statku.", 0.0, maxHp,
@@ -34,6 +37,7 @@ public class Ship {
         this.currentLocation = currentLocation;
         this.defeated = false;
         this.defeatReason = "";
+        this.crewIncidentMessage = "";
         applyShipModel(shipModel);
     }
 
@@ -92,6 +96,9 @@ public class Ship {
 
     public void setCredits(double credits) {
         this.credits = credits;
+        if (this.credits <= DEBT_DEFEAT_LIMIT) {
+            markDefeated("Dlug przekroczyl -500 cr. Załoga porzuciła kontrakt, a statek został przejęty przez wierzycieli.");
+        }
     }
 
     public double getCurrentFuel() {
@@ -188,5 +195,17 @@ public class Ship {
     public void markDefeated(String defeatReason) {
         this.defeated = true;
         this.defeatReason = defeatReason;
+    }
+
+    public String getCrewIncidentMessage() {
+        return crewIncidentMessage;
+    }
+
+    public void setCrewIncidentMessage(String crewIncidentMessage) {
+        this.crewIncidentMessage = crewIncidentMessage != null ? crewIncidentMessage : "";
+    }
+
+    public void clearCrewIncidentMessage() {
+        this.crewIncidentMessage = "";
     }
 }
