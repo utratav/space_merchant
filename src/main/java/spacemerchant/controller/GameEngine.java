@@ -1,7 +1,7 @@
 package spacemerchant.controller;
 
 import spacemerchant.data.ShipData;
-import spacemerchant.model.EconomyType;
+import spacemerchant.data.UniverseData;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import spacemerchant.view.CockpitWindow;
@@ -15,11 +15,7 @@ public class GameEngine {
 
         this.guiManager = new GuiManager();
 
-        this.startingLocation = new Location("Ziemia", 0, 0, EconomyType.INDUSTRIAL, true);
-
-        Location Mars = new Location("Mars", 10, 10, EconomyType.MINING, true);
-        this.startingLocation.addPath(Mars, 15.0);
-
+        this.startingLocation = UniverseData.getStartingLocation();
         this.playerShip = new Ship(ShipData.getStartingModel(), 1000.0, startingLocation);
     }
 
