@@ -14,18 +14,21 @@ import spacemerchant.data.SaveManager;
 import spacemerchant.data.ShipData;
 import spacemerchant.data.UniverseData;
 import spacemerchant.model.Ship;
+import spacemerchant.service.CampaignService;
 
 import java.util.List;
 
 public class MainMenuWindow extends BasicWindow {
     private final GuiManager guiManager;
     private final SaveManager saveManager;
+    private final CampaignService campaignService;
     private String message = "";
 
     public MainMenuWindow(GuiManager guiManager) {
         super("Space Merchant - Menu Główne");
         this.guiManager = guiManager;
         this.saveManager = new SaveManager();
+        this.campaignService = new CampaignService();
         setHints(List.of(Window.Hint.CENTERED));
 
         refreshUI();
@@ -50,6 +53,14 @@ public class MainMenuWindow extends BasicWindow {
         titlePanel.addComponent(new Label("Handel, zaloga i dalekie szlaki nadprzestrzenne"));
         titlePanel.addComponent(new Label("Czarno-bialy kokpit kapitana: kupuj, rekrutuj, ulepszaj i przetrwaj trase."));
         centerPanel.addComponent(titlePanel.withBorder(Borders.singleLine("TRANSMISJA STARTOWA")));
+        centerPanel.addComponent(new EmptySpace());
+
+        Panel objectivesPanel = new Panel(new GridLayout(1));
+        objectivesPanel.addComponent(new Label("Aby wygrać kampanię, spełnij wszystkie cele:"));
+        for (String objective : campaignService.getObjectiveDescriptions()) {
+            objectivesPanel.addComponent(new Label("- " + objective));
+        }
+        centerPanel.addComponent(objectivesPanel.withBorder(Borders.singleLine("CELE KAMPANII")));
         centerPanel.addComponent(new EmptySpace());
 
         Panel buttonsPanel = new Panel(new GridLayout(1));

@@ -71,6 +71,9 @@ public class SaveManager {
         public double maxCargoWeight;
         public int maxCrew;
         public double fuelPerTurn;
+        public boolean victorious;
+        public String victoryReason;
+        public List<String> visitedLocationNames = new ArrayList<>();
         public List<CargoItemSaveData> cargo = new ArrayList<>();
         public List<CrewMemberSaveData> crew = new ArrayList<>();
         public List<ShipUpgradeSaveData> activeUpgrades = new ArrayList<>();
@@ -88,6 +91,9 @@ public class SaveManager {
             saveData.maxCargoWeight = ship.getMaxCargoWeight();
             saveData.maxCrew = ship.getMaxCrew();
             saveData.fuelPerTurn = ship.getFuelPerTurn();
+            saveData.victorious = ship.isVictorious();
+            saveData.victoryReason = ship.getVictoryReason();
+            saveData.visitedLocationNames = new ArrayList<>(ship.getVisitedLocationNames());
 
             for (Map.Entry<Item, Integer> entry : ship.getCargo().getItems().entrySet()) {
                 saveData.cargo.add(CargoItemSaveData.fromItem(entry.getKey(), entry.getValue()));
@@ -116,6 +122,10 @@ public class SaveManager {
             ship.setFuelPerTurn(fuelPerTurn);
             ship.setCurrentFuel(currentFuel);
             ship.setCurrentHp(currentHp);
+            ship.setVisitedLocationNames(visitedLocationNames);
+            if (victorious) {
+                ship.markVictorious(victoryReason);
+            }
 
             for (CargoItemSaveData cargoItem : cargo) {
                 ship.getCargo().addItem(cargoItem.toItem(), cargoItem.amount);

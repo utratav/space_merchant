@@ -1,7 +1,9 @@
 package spacemerchant.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Ship {
     private static final double DEBT_DEFEAT_LIMIT = -500.0;
@@ -22,7 +24,10 @@ public class Ship {
     private List<CrewMember> crew;
     private boolean defeated;
     private String defeatReason;
+    private boolean victorious;
+    private String victoryReason;
     private String crewIncidentMessage;
+    private Set<String> visitedLocationNames;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Location currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this(new ShipModel("custom", name, "Niestandardowy model statku.", 0.0, maxHp,
@@ -37,8 +42,12 @@ public class Ship {
         this.currentLocation = currentLocation;
         this.defeated = false;
         this.defeatReason = "";
+        this.victorious = false;
+        this.victoryReason = "";
         this.crewIncidentMessage = "";
+        this.visitedLocationNames = new LinkedHashSet<>();
         applyShipModel(shipModel);
+        visitLocation(currentLocation);
     }
 
     public boolean hasEnoughCredits(double amount) {
@@ -133,6 +142,7 @@ public class Ship {
 
     public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
+        visitLocation(currentLocation);
     }
 
     public int getMaxHp() {
@@ -197,6 +207,19 @@ public class Ship {
         this.defeatReason = defeatReason;
     }
 
+    public boolean isVictorious() {
+        return victorious;
+    }
+
+    public String getVictoryReason() {
+        return victoryReason;
+    }
+
+    public void markVictorious(String victoryReason) {
+        this.victorious = true;
+        this.victoryReason = victoryReason;
+    }
+
     public String getCrewIncidentMessage() {
         return crewIncidentMessage;
     }
@@ -207,5 +230,23 @@ public class Ship {
 
     public void clearCrewIncidentMessage() {
         this.crewIncidentMessage = "";
+    }
+
+    public Set<String> getVisitedLocationNames() {
+        return visitedLocationNames;
+    }
+
+    public void setVisitedLocationNames(List<String> visitedLocationNames) {
+        this.visitedLocationNames.clear();
+        if (visitedLocationNames != null) {
+            this.visitedLocationNames.addAll(visitedLocationNames);
+        }
+        visitLocation(currentLocation);
+    }
+
+    private void visitLocation(Location location) {
+        if (location != null) {
+            visitedLocationNames.add(location.getName());
+        }
     }
 }

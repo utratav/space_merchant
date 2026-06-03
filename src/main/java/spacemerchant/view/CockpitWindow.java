@@ -6,11 +6,13 @@ import spacemerchant.data.SaveManager;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
+import spacemerchant.service.CampaignService;
 
 public class CockpitWindow extends BasicWindow {
     private GuiManager guiManager;
     private Ship ship;
     private SaveManager saveManager;
+    private CampaignService campaignService;
     private String message = "";
 
     public CockpitWindow(GuiManager guiManager, Ship ship) {
@@ -18,6 +20,7 @@ public class CockpitWindow extends BasicWindow {
         this.guiManager = guiManager;
         this.ship = ship;
         this.saveManager = new SaveManager();
+        this.campaignService = new CampaignService();
 
         // Budujemy interfejs po raz pierwszy
         refreshUI();
@@ -30,6 +33,12 @@ public class CockpitWindow extends BasicWindow {
 
         if (ship.isDefeated()) {
             renderDefeatScreen();
+            return;
+        }
+
+        campaignService.checkVictory(ship);
+        if (ship.isVictorious()) {
+            renderVictoryScreen();
             return;
         }
 
@@ -85,6 +94,13 @@ public class CockpitWindow extends BasicWindow {
             actionMenuPanel.addComponent(new Label("INCYDENT: " + ship.getCrewIncidentMessage()));
         }
 
+        actionMenuPanel.addComponent(new EmptySpace());
+        Panel objectivesPanel = new Panel(new GridLayout(1));
+        for (String objective : campaignService.getObjectiveProgress(ship)) {
+            objectivesPanel.addComponent(new Label(objective));
+        }
+        actionMenuPanel.addComponent(objectivesPanel.withBorder(Borders.singleLine("CELE KAMPANII")));
+
         rootPanel.addComponent(actionMenuPanel.withBorder(Borders.singleLine("WYBIERZ AKCJĘ")));
 
         // --- PRAWY PANEL: STATUS POKŁADOWY ---
@@ -132,6 +148,19 @@ public class CockpitWindow extends BasicWindow {
         rootPanel.addComponent(new EmptySpace());
         rootPanel.addComponent(new Button("Wyjście z gry", this::close));
         this.setComponent(rootPanel.withBorder(Borders.singleLine("RAPORT KONCOWY")));
+    }
+
+    private void renderVictoryScreen() {
+        Panel rootPanel = new Panel(new GridLayout(1));
+        rootPanel.addComponent(new Label("ZWYCIĘSTWO"));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Label(ship.getVictoryReason()));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Label("Twoja załoga zapisała się w historii szlaków nadprzestrzennych."));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Button("Zapisz i wyjdź", this::saveAndExit));
+        rootPanel.addComponent(new Button("Wyjście z gry", this::close));
+        this.setComponent(rootPanel.withBorder(Borders.singleLine("RAPORT ZWYCIESTWA")));
     }
 
     private void saveAndExit() {
