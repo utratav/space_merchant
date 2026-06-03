@@ -40,6 +40,7 @@ public class NavigationService {
         crewService.paySalaries(ship);
         ship.setCurrentFuel(ship.getCurrentFuel() - cost);
         ship.setCurrentLocation(destination);
+        crewService.grantPilotingExperience(ship, 25);
 
         // --- MECHANIKA ZDARZEŃ LOSOWYCH ---
         // Generujemy 35% szansy na napotkanie zdarzenia po drodze

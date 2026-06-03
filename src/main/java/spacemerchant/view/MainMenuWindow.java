@@ -32,8 +32,13 @@ public class MainMenuWindow extends BasicWindow {
     }
 
     private void refreshUI() {
-        Panel rootPanel = new Panel(new GridLayout(1));
-        rootPanel.setPreferredSize(new TerminalSize(96, 24));
+        Panel rootPanel = new Panel(new GridLayout(3));
+        rootPanel.setPreferredSize(new TerminalSize(130, 30));
+
+        rootPanel.addComponent(new EmptySpace(new TerminalSize(14, 1)));
+
+        Panel centerPanel = new Panel(new GridLayout(1));
+        centerPanel.setPreferredSize(new TerminalSize(98, 30));
 
         Panel titlePanel = new Panel(new GridLayout(1));
         titlePanel.addComponent(new Label("  _____ ____     _    ____ _____   __  __ _____ ____   ____ _   _    _    _   _ _____ "));
@@ -44,8 +49,8 @@ public class MainMenuWindow extends BasicWindow {
         titlePanel.addComponent(new EmptySpace());
         titlePanel.addComponent(new Label("Handel, zaloga i dalekie szlaki nadprzestrzenne"));
         titlePanel.addComponent(new Label("Czarno-bialy kokpit kapitana: kupuj, rekrutuj, ulepszaj i przetrwaj trase."));
-        rootPanel.addComponent(titlePanel.withBorder(Borders.singleLine("TRANSMISJA STARTOWA")));
-        rootPanel.addComponent(new EmptySpace());
+        centerPanel.addComponent(titlePanel.withBorder(Borders.singleLine("TRANSMISJA STARTOWA")));
+        centerPanel.addComponent(new EmptySpace());
 
         Panel buttonsPanel = new Panel(new GridLayout(1));
         buttonsPanel.addComponent(new Button("Nowa Gra", () -> startGame(createNewGame())));
@@ -58,12 +63,15 @@ public class MainMenuWindow extends BasicWindow {
         buttonsPanel.addComponent(loadButton);
 
         buttonsPanel.addComponent(new Button("Wyjdź", this::close));
-        rootPanel.addComponent(buttonsPanel.withBorder(Borders.singleLine("MENU")));
+        centerPanel.addComponent(buttonsPanel.withBorder(Borders.singleLine("MENU")));
 
         if (!message.isEmpty()) {
-            rootPanel.addComponent(new EmptySpace());
-            rootPanel.addComponent(new Label(message));
+            centerPanel.addComponent(new EmptySpace());
+            centerPanel.addComponent(new Label(message));
         }
+
+        rootPanel.addComponent(centerPanel);
+        rootPanel.addComponent(new EmptySpace(new TerminalSize(14, 1)));
 
         this.setComponent(rootPanel);
     }

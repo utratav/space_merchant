@@ -1,5 +1,6 @@
 package spacemerchant.view;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
 import spacemerchant.data.ShipData;
@@ -38,6 +39,7 @@ public class ShipyardWindow extends BasicWindow {
 
     private void refreshUI() {
         Panel rootPanel = new Panel(new GridLayout(1));
+        rootPanel.setPreferredSize(new TerminalSize(132, 42));
 
         Panel headerPanel = new Panel(new GridLayout(2));
         headerPanel.addComponent(new Label(String.format("Kredyty: %.2f cr", ship.getCredits())));

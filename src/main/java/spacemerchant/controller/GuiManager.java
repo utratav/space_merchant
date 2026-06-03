@@ -23,7 +23,7 @@ public class GuiManager {
         try {
             // Konfiguracja rozmiarów terminala
             DefaultTerminalFactory factory = new DefaultTerminalFactory();
-            factory.setInitialTerminalSize(new TerminalSize(140, 42));
+            factory.setInitialTerminalSize(new TerminalSize(170, 50));
             factory.setTerminalEmulatorFontConfiguration(SwingTerminalFontConfiguration.getDefaultOfSize(20));
 
             // Utworzenie terminala i buforowanego ekranu

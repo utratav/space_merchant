@@ -3,6 +3,7 @@ package spacemerchant.data;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import spacemerchant.model.CrewMember;
+import spacemerchant.model.CrewSkill;
 import spacemerchant.model.Item;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
@@ -186,6 +187,10 @@ public class SaveManager {
         public int combat;
         public int engineering;
         public int trade;
+        public int pilotingExperience;
+        public int combatExperience;
+        public int engineeringExperience;
+        public int tradeExperience;
 
         public static CrewMemberSaveData fromCrewMember(CrewMember member) {
             CrewMemberSaveData saveData = new CrewMemberSaveData();
@@ -198,12 +203,20 @@ public class SaveManager {
             saveData.combat = member.getCombat();
             saveData.engineering = member.getEngineering();
             saveData.trade = member.getTrade();
+            saveData.pilotingExperience = member.getExperience(CrewSkill.PILOTING);
+            saveData.combatExperience = member.getExperience(CrewSkill.COMBAT);
+            saveData.engineeringExperience = member.getExperience(CrewSkill.ENGINEERING);
+            saveData.tradeExperience = member.getExperience(CrewSkill.TRADE);
             return saveData;
         }
 
         public CrewMember toCrewMember() {
             CrewMember member = new CrewMember(name, role, maxHp, salary, piloting, combat, engineering, trade);
             member.setHp(hp);
+            member.setExperience(CrewSkill.PILOTING, pilotingExperience);
+            member.setExperience(CrewSkill.COMBAT, combatExperience);
+            member.setExperience(CrewSkill.ENGINEERING, engineeringExperience);
+            member.setExperience(CrewSkill.TRADE, tradeExperience);
             return member;
         }
     }

@@ -9,6 +9,7 @@ import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 
 public class MarketService {
+    private final CrewService crewService = new CrewService();
 
     // Obliczanie aktualnej ceny kupna dla gracza
     public double calculateBuyPrice(Ship ship, Item item, Location location) {
@@ -63,6 +64,7 @@ public class MarketService {
         // Finalizacja transakcji: pobranie opłaty i dodanie towaru
         ship.setCredits(ship.getCredits() - totalCost);
         ship.getCargo().addItem(item, amount);
+        crewService.grantTradeExperience(ship, Math.min(40, 8 + amount * 2));
     }
 
     public void sellItem(Ship ship, Item item, int amount, Location location) {
@@ -86,6 +88,7 @@ public class MarketService {
         // Finalizacja transakcji: usunięcie towaru i przelew środków
         ship.getCargo().removeItem(item, amount);
         ship.setCredits(ship.getCredits() + totalRevenue);
+        crewService.grantTradeExperience(ship, Math.min(40, 8 + amount * 2));
     }
 
     // Modyfikator cen w zależności od typu planety

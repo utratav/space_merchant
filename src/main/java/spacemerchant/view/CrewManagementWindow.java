@@ -3,6 +3,7 @@ package spacemerchant.view;
 import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
 import spacemerchant.model.CrewMember;
+import spacemerchant.model.CrewSkill;
 import spacemerchant.model.Ship;
 import spacemerchant.service.CrewService;
 
@@ -12,9 +13,10 @@ public class CrewManagementWindow extends BasicWindow {
     private Ship ship;
     private CrewService crewService;
     private String errorMessage = "";
+    private boolean stationServicesAvailable;
 
     public CrewManagementWindow(GuiManager guiManager, Ship ship) {
-        super("Zarządzanie Załogą");
+        super("Ambulatorium i Trening Załogi");
         this.guiManager = guiManager;
         this.ship = ship;
         this.crewService = new CrewService();
@@ -26,9 +28,13 @@ public class CrewManagementWindow extends BasicWindow {
     // Metoda odświeżająca interfejs po interakcji (np. leczeniu)
     private void refreshUI() {
         Panel rootPanel = new Panel(new GridLayout(1));
+        stationServicesAvailable = ship.getCurrentLocation() != null && ship.getCurrentLocation().hasStation();
 
         // Nagłówek
         rootPanel.addComponent(new Label(String.format("Dostępne fundusze: %.2f cr", ship.getCredits())));
+        rootPanel.addComponent(new Label(stationServicesAvailable
+                ? "Status: zadokowano - ambulatorium i sale treningowe aktywne."
+                : "Status: poza stacją - tylko podgląd załogi, usługi niedostępne."));
         rootPanel.addComponent(new EmptySpace());
 
         // Panel wyświetlający kafle z członkami załogi (2 kolumny dla czytelności)
@@ -49,10 +55,10 @@ public class CrewManagementWindow extends BasicWindow {
                 memberPanel.addComponent(new EmptySpace());
 
                 // Statystyki gwiazdkowe
-                memberPanel.addComponent(new Label("Pilotaż:   " + UIUtils.drawStars(member.getPiloting())));
-                memberPanel.addComponent(new Label("Walka:     " + UIUtils.drawStars(member.getCombat())));
-                memberPanel.addComponent(new Label("Inżynieria:" + UIUtils.drawStars(member.getEngineering())));
-                memberPanel.addComponent(new Label("Handel:    " + UIUtils.drawStars(member.getTrade())));
+                memberPanel.addComponent(new Label(skillLine(member, CrewSkill.PILOTING)));
+                memberPanel.addComponent(new Label(skillLine(member, CrewSkill.COMBAT)));
+                memberPanel.addComponent(new Label(skillLine(member, CrewSkill.ENGINEERING)));
+                memberPanel.addComponent(new Label(skillLine(member, CrewSkill.TRADE)));
 
                 memberPanel.addComponent(new EmptySpace());
 
@@ -74,8 +80,18 @@ public class CrewManagementWindow extends BasicWindow {
                     healButton.setEnabled(false);
                     healButton.setLabel("Zdrowie w normie");
                 }
+                if (!stationServicesAvailable) {
+                    healButton.setEnabled(false);
+                    healButton.setLabel("Ambulatorium tylko na stacji");
+                }
 
                 memberPanel.addComponent(healButton);
+                memberPanel.addComponent(new EmptySpace());
+                memberPanel.addComponent(new Label("Trening: 250 cr za +1 do wybranej statystyki"));
+                memberPanel.addComponent(createTrainingButton(member, CrewSkill.PILOTING));
+                memberPanel.addComponent(createTrainingButton(member, CrewSkill.COMBAT));
+                memberPanel.addComponent(createTrainingButton(member, CrewSkill.ENGINEERING));
+                memberPanel.addComponent(createTrainingButton(member, CrewSkill.TRADE));
 
                 // Dodanie ramki do pojedynczego wałoganta i wrzucenie go do siatki
                 crewGridPanel.addComponent(memberPanel.withBorder(Borders.singleLine()));
@@ -95,5 +111,39 @@ public class CrewManagementWindow extends BasicWindow {
         rootPanel.addComponent(new Button("Wróć do kokpitu", this::close));
 
         this.setComponent(rootPanel);
+    }
+
+    private Button createTrainingButton(CrewMember member, CrewSkill skill) {
+        double trainingCost = 250.0;
+        Button trainingButton = new Button("Trenuj " + skill.getDisplayName(), () -> {
+            try {
+                crewService.trainCrewMember(ship, member, skill, trainingCost);
+                errorMessage = "";
+                refreshUI();
+            } catch (RuntimeException e) {
+                errorMessage = e.getMessage();
+                refreshUI();
+            }
+        });
+
+        if (!stationServicesAvailable) {
+            trainingButton.setEnabled(false);
+            trainingButton.setLabel("Trening tylko na stacji");
+        } else if (!member.canImprove(skill)) {
+            trainingButton.setEnabled(false);
+            trainingButton.setLabel(skill.getDisplayName() + " na maksimum");
+        } else if (member.getHp() <= 0) {
+            trainingButton.setEnabled(false);
+            trainingButton.setLabel("Najpierw ambulatorium");
+        }
+
+        return trainingButton;
+    }
+
+    private String skillLine(CrewMember member, CrewSkill skill) {
+        return String.format("%-11s %s XP %d/100",
+                skill.getDisplayName() + ":",
+                UIUtils.drawStars(member.getSkillValue(skill)),
+                member.getExperience(skill));
     }
 }

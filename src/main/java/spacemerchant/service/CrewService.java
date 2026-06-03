@@ -3,17 +3,22 @@ package spacemerchant.service;
 import spacemerchant.exception.CrewFullException;
 import spacemerchant.exception.NotEnoughCreditsException;
 import spacemerchant.model.CrewMember;
+import spacemerchant.model.CrewSkill;
 import spacemerchant.model.Ship;
 
 public class CrewService {
     public static final String ROLE_PILOT = "Pilot";
+    public static final String ROLE_NAVIGATOR = "Nawigator";
+    public static final String ROLE_ENGINEER = "Inzynier";
+    public static final String ROLE_MECHANIC = "Mechanik";
+    public static final String ROLE_TECHNICIAN = "Technik";
+    public static final String ROLE_TRADER = "Handlarz";
+    public static final String ROLE_NEGOTIATOR = "Negocjator";
+    public static final String ROLE_GUNNER = "Strzelec";
+    public static final String ROLE_GUARD = "Ochroniarz";
 
     public void recruitMember(Ship ship, CrewMember member, double recruitmentCost) {
-
-        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
-        if (ship.getCurrentLocation() == null) {
-            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
-        }
+        ensureStationServiceAvailable(ship);
 
         // Sprawdzenie limitu miejsc
         if (ship.getCrew().size() >= ship.getMaxCrew()) {
@@ -34,11 +39,7 @@ public class CrewService {
 
      // Leczy członka załogi do pełnego poziomu HP.
     public void healCrewMember(Ship ship, CrewMember member, double cost) {
-
-        // Zabezpieczenie przed akcjami w trakcie lotu kosmicznego
-        if (ship.getCurrentLocation() == null) {
-            throw new IllegalStateException("Odmowa dostępu. Statek znajduje się w przestrzeni kosmicznej!");
-        }
+        ensureStationServiceAvailable(ship);
 
         if (!ship.hasEnoughCredits(cost)) {
             throw new NotEnoughCreditsException("Brak kredytów na leczenie w ambulatorium.");
@@ -50,6 +51,25 @@ public class CrewService {
 
         ship.setCredits(ship.getCredits() - cost);
         member.setHp(member.getMaxHp());
+    }
+
+    public void trainCrewMember(Ship ship, CrewMember member, CrewSkill skill, double cost) {
+        ensureStationServiceAvailable(ship);
+
+        if (!isAlive(member)) {
+            throw new IllegalStateException("Nie można trenować nieprzytomnego członka załogi. Najpierw użyj ambulatorium.");
+        }
+
+        if (!member.canImprove(skill)) {
+            throw new IllegalArgumentException(member.getName() + " ma już maksymalny poziom: " + skill.getDisplayName());
+        }
+
+        if (!ship.hasEnoughCredits(cost)) {
+            throw new NotEnoughCreditsException("Brak kredytów na trening. Potrzeba: " + cost);
+        }
+
+        ship.setCredits(ship.getCredits() - cost);
+        member.increaseSkill(skill);
     }
 
     // Wypłaty dla załogi
@@ -83,6 +103,47 @@ public class CrewService {
 
     public boolean isAlive(CrewMember member) {
         return member != null && member.getHp() > 0;
+    }
+
+    public void grantPilotingExperience(Ship ship, int amount) {
+        grantExperienceForRoles(ship, CrewSkill.PILOTING, amount, ROLE_PILOT, ROLE_NAVIGATOR);
+    }
+
+    public void grantCombatExperience(Ship ship, int amount) {
+        grantExperienceForRoles(ship, CrewSkill.COMBAT, amount, ROLE_GUNNER, ROLE_GUARD);
+    }
+
+    public void grantEngineeringExperience(Ship ship, int amount) {
+        grantExperienceForRoles(ship, CrewSkill.ENGINEERING, amount, ROLE_ENGINEER, ROLE_MECHANIC, ROLE_TECHNICIAN);
+    }
+
+    public void grantTradeExperience(Ship ship, int amount) {
+        grantExperienceForRoles(ship, CrewSkill.TRADE, amount, ROLE_TRADER, ROLE_NEGOTIATOR);
+    }
+
+    public void grantExperienceForRoles(Ship ship, CrewSkill skill, int amount, String... roles) {
+        if (ship == null || ship.getCrew() == null) {
+            return;
+        }
+
+        for (CrewMember member : ship.getCrew()) {
+            if (!isAlive(member)) {
+                continue;
+            }
+
+            for (String role : roles) {
+                if (hasRole(member, role)) {
+                    member.addExperience(skill, amount);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void ensureStationServiceAvailable(Ship ship) {
+        if (ship.getCurrentLocation() == null || !ship.getCurrentLocation().hasStation()) {
+            throw new IllegalStateException("Usługa dostępna wyłącznie po zadokowaniu na stacji.");
+        }
     }
 
     private boolean hasRole(CrewMember member, String requiredRole) {

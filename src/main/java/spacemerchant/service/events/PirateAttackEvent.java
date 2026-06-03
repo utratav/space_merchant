@@ -10,6 +10,7 @@ import java.util.Random;
 
 public class PirateAttackEvent implements EncounterEvent {
     private final Random random = new Random();
+    private final CrewService crewService = new CrewService();
 
     @Override
     public void trigger(Ship ship, GuiManager guiManager) {
@@ -59,6 +60,7 @@ public class PirateAttackEvent implements EncounterEvent {
 
         // --- OPCJA 1: WALKA ---
         Button fightBtn = new Button("1. Podejmij walkę (" + fightChance + "%)", () -> {
+            crewService.grantCombatExperience(ship, 35);
             if (rollSuccess(fightChance)) {
                 ship.setCredits(ship.getCredits() + loot);
                 showResult(eventWindow, guiManager, "Zwycięstwo! Piraci rozbici. Zabrano " + loot + " cr łupu.");
@@ -70,6 +72,7 @@ public class PirateAttackEvent implements EncounterEvent {
 
         // --- OPCJA 2: UCIECZKA ---
         Button fleeBtn = new Button("2. Próba ucieczki (" + fleeChance + "%)", () -> {
+            crewService.grantPilotingExperience(ship, 30);
             if (rollSuccess(fleeChance)) {
                 showResult(eventWindow, guiManager, "Ucieczka udana! Pilot wymanewrował wroga i odskoczył.");
             } else {

@@ -7,6 +7,7 @@ import spacemerchant.model.Ship;
 import spacemerchant.model.ShipModel;
 
 public class ShipService {
+    private final CrewService crewService = new CrewService();
 
     public void buyShipModel(Ship ship, ShipModel newModel) {
         if (isCurrentModel(ship, newModel)) {
@@ -27,6 +28,31 @@ public class ShipService {
 
         ship.setCredits(ship.getCredits() - newModel.getPrice());
         ship.applyShipModel(newModel);
+    }
+
+    public void refuel(Ship ship, double amount, double unitPrice) {
+        if (ship.getCurrentLocation() == null || !ship.getCurrentLocation().hasStation()) {
+            throw new IllegalStateException("Tankowanie jest dostępne wyłącznie w porcie.");
+        }
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Podaj ilość paliwa większą od zera.");
+        }
+
+        double missingFuel = ship.getMaxFuel() - ship.getCurrentFuel();
+        double fuelToBuy = Math.min(amount, missingFuel);
+        if (fuelToBuy <= 0) {
+            throw new IllegalArgumentException("Zbiorniki są już pełne.");
+        }
+
+        double totalCost = fuelToBuy * unitPrice;
+        if (!ship.hasEnoughCredits(totalCost)) {
+            throw new NotEnoughCreditsException("Brak kredytów na tankowanie. Potrzeba: " + totalCost);
+        }
+
+        ship.setCredits(ship.getCredits() - totalCost);
+        ship.setCurrentFuel(ship.getCurrentFuel() + fuelToBuy);
+        crewService.grantEngineeringExperience(ship, 10);
     }
 
     public boolean isCurrentModel(Ship ship, ShipModel model) {
