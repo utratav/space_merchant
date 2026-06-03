@@ -53,10 +53,13 @@ public class CockpitWindow extends BasicWindow {
 
         if (currentLocation == null || !currentLocation.hasStation()) {
             dockButton.setEnabled(false);
-            dockButton.setLabel("[4] Brak stacji w tym sektorze");
+            dockButton.setLabel("[4] -- BRAK STACJI --");
         }
 
         actionMenuPanel.addComponent(dockButton);
+        if (currentLocation == null || !currentLocation.hasStation()) {
+            actionMenuPanel.addComponent(new Label("    Dokowanie niedostepne poza stacja."));
+        }
 
         actionMenuPanel.addComponent(new Button("[5] Schemat Statku", () -> {
             guiManager.showWindow(new SchematicWindow(ship));
