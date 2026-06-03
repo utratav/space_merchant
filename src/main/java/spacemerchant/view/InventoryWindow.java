@@ -28,7 +28,7 @@ public class InventoryWindow extends BasicWindow {
         mainPanel.addComponent(new EmptySpace());
 
         // --- Tabela asortymentu ---
-        Table<String> inventoryTable = new Table<>("Przedmiot", "Ilość", "Wartość bazowa", "Waga (szt)");
+        Table<String> inventoryTable = new Table<>("Przedmiot", "Ilość", "Wartość", "Opis");
 
         Map<Item, Integer> items = ship.getCargo().getItems();
 
@@ -55,8 +55,8 @@ public class InventoryWindow extends BasicWindow {
             inventoryTable.getTableModel().addRow(
                     item.getName() + " [" + item.getId() + "]",
                     String.valueOf(amount),
-                    String.format("%.2f cr", item.getBasePrice()),
-                    String.format("%.2f t", item.getWeight())
+                    String.format("%.2f cr", item.getBasePrice() * amount),
+                    String.format("Waga: %.2f t/szt.", item.getWeight())
             );
         }
     }

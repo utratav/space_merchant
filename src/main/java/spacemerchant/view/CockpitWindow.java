@@ -73,7 +73,9 @@ public class CockpitWindow extends BasicWindow {
             statusPanel.addComponent(new Label("Brak załogi na pokładzie."));
         } else {
             for (CrewMember member : ship.getCrew()) {
+                String crewHpBar = UIUtils.drawProgressBar(member.getHp(), member.getMaxHp(), 10);
                 statusPanel.addComponent(new Label("- " + member.getName() + " (" + member.getRole() + ")"));
+                statusPanel.addComponent(new Label("  HP: " + crewHpBar + " " + member.getHp() + "/" + member.getMaxHp()));
             }
         }
 
