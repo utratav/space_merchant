@@ -6,6 +6,7 @@ import spacemerchant.model.CrewMember;
 import spacemerchant.model.Ship;
 
 public class CrewService {
+    public static final String ROLE_PILOT = "Pilot";
 
     public void recruitMember(Ship ship, CrewMember member, double recruitmentCost) {
 
@@ -64,5 +65,27 @@ public class CrewService {
 
             ship.setCredits(newBalance);
         }
+    }
+
+    public boolean hasLivingCrewWithRole(Ship ship, String requiredRole) {
+        if (ship == null || ship.getCrew() == null) {
+            return false;
+        }
+
+        for (CrewMember member : ship.getCrew()) {
+            if (isAlive(member) && hasRole(member, requiredRole)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isAlive(CrewMember member) {
+        return member != null && member.getHp() > 0;
+    }
+
+    private boolean hasRole(CrewMember member, String requiredRole) {
+        return member.getRole() != null && member.getRole().equalsIgnoreCase(requiredRole);
     }
 }

@@ -2,6 +2,7 @@ package spacemerchant.service;
 
 import spacemerchant.controller.GuiManager;
 import spacemerchant.exception.NotEnoughFuelException;
+import spacemerchant.exception.ShipDestroyedException;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import spacemerchant.service.events.EncounterEvent;
@@ -24,6 +25,8 @@ public class NavigationService {
     }
 
     public void travel(Ship ship, Location destination, GuiManager guiManager) {
+        validatePilotReady(ship);
+
         double cost = ship.getCurrentLocation().getConnectedPaths().getOrDefault(destination, -1.0);
 
         if (cost < 0) {
@@ -47,5 +50,20 @@ public class NavigationService {
             // Wrzucamy okno awaryjne na ekran
             guiManager.showWindow(new EncounterDialog(guiManager, ship, randomEvent));
         }
+    }
+
+    private void validatePilotReady(Ship ship) {
+        if (crewService.hasLivingCrewWithRole(ship, CrewService.ROLE_PILOT)) {
+            return;
+        }
+
+        Location currentLocation = ship.getCurrentLocation();
+        if (currentLocation != null && currentLocation.hasStation()) {
+            throw new IllegalStateException("Brak żywego pilota na pokładzie. Zwerbuj pilota w kantynie.");
+        }
+
+        String defeatReason = "Statek dryfuje poza stacją bez żywego pilota. Załoga nie jest w stanie wykonać skoku.";
+        ship.markDefeated(defeatReason);
+        throw new ShipDestroyedException(defeatReason);
     }
 }

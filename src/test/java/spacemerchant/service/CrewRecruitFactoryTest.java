@@ -34,4 +34,13 @@ class CrewRecruitFactoryTest {
         assertEquals(20, recruits.size());
         assertEquals(20, uniqueNames.size());
     }
+
+    @Test
+    void shouldAlwaysIncludePilotInRecruitPool() {
+        CrewRecruitFactory factory = new CrewRecruitFactory(new Random(7));
+
+        List<CrewMember> recruits = factory.generateRecruitPool(6);
+
+        assertEquals(CrewService.ROLE_PILOT, recruits.getFirst().getRole());
+    }
 }

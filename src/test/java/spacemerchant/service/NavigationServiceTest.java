@@ -3,6 +3,7 @@ package spacemerchant.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spacemerchant.exception.NotEnoughFuelException;
+import spacemerchant.exception.ShipDestroyedException;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.EconomyType;
 import spacemerchant.model.Location;
@@ -64,5 +65,28 @@ class NavigationServiceTest {
         });
 
         assertEquals(locA, testShip.getCurrentLocation(), "Statek nie powinien się ruszyć w przypadku braku paliwa!");
+    }
+
+    @Test
+    void shouldRequireLivingPilotBeforeTravel() {
+        Ship shipWithoutPilot = new Ship("Prometeusz", 1000.0, 100.0, 50.0, locA, 100, 2, 1.0);
+
+        assertThrows(IllegalStateException.class, () -> {
+            navigationService.travel(shipWithoutPilot, locB);
+        });
+
+        assertEquals(locA, shipWithoutPilot.getCurrentLocation());
+    }
+
+    @Test
+    void shouldDefeatShipWithoutPilotOutsideStation() {
+        Ship shipWithoutPilot = new Ship("Prometeusz", 1000.0, 100.0, 50.0, locC, 100, 2, 1.0);
+        locC.addPath(locB, 5.0);
+
+        assertThrows(ShipDestroyedException.class, () -> {
+            navigationService.travel(shipWithoutPilot, locB);
+        });
+
+        assertTrue(shipWithoutPilot.isDefeated());
     }
 }

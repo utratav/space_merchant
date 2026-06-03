@@ -66,6 +66,10 @@ public class StarMapWindow extends BasicWindow {
                             navigationService.travel(ship, destination, guiManager);
                             this.close();
                         } catch (RuntimeException e) {
+                            if (ship.isDefeated()) {
+                                this.close();
+                                return;
+                            }
                             errorMessage = e.getMessage();
                             refreshUI();
                         }

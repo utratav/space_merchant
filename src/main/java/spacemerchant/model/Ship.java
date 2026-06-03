@@ -18,6 +18,8 @@ public class Ship {
     private double fuelPerTurn;
     private List<ShipUpgrade> activeUpgrades;
     private List<CrewMember> crew;
+    private boolean defeated;
+    private String defeatReason;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Location currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
         this(new ShipModel("custom", name, "Niestandardowy model statku.", 0.0, maxHp,
@@ -30,6 +32,8 @@ public class Ship {
         this.cargo = new Inventory();
         this.credits = credits;
         this.currentLocation = currentLocation;
+        this.defeated = false;
+        this.defeatReason = "";
         applyShipModel(shipModel);
     }
 
@@ -147,6 +151,10 @@ public class Ship {
         } else {
             this.currentHp = currentHp;
         }
+
+        if (this.currentHp == 0) {
+            markDefeated("Kadlub statku zostal zniszczony. Misja zakonczona porazka.");
+        }
     }
 
     public int getMaxCrew() {
@@ -168,4 +176,17 @@ public class Ship {
     public void setMaxFuel(double maxFuel) {this.maxFuel = maxFuel;}
 
     public void setMaxCargoWeight(double maxCargoWeight) {this.maxCargoWeight = maxCargoWeight;}
+
+    public boolean isDefeated() {
+        return defeated;
+    }
+
+    public String getDefeatReason() {
+        return defeatReason;
+    }
+
+    public void markDefeated(String defeatReason) {
+        this.defeated = true;
+        this.defeatReason = defeatReason;
+    }
 }

@@ -66,12 +66,13 @@ public class CrewRecruitFactory {
         List<CrewMember> recruits = new ArrayList<>();
         Set<String> usedNames = new HashSet<>();
 
-        while (recruits.size() < count) {
-            String fullName = randomFullName();
-            if (!usedNames.add(fullName)) {
-                continue;
-            }
+        if (count > 0) {
+            String fullName = randomUniqueFullName(usedNames);
+            recruits.add(createRecruit(fullName, ROLE_TEMPLATES.get(0)));
+        }
 
+        while (recruits.size() < count) {
+            String fullName = randomUniqueFullName(usedNames);
             recruits.add(createRecruit(fullName));
         }
 
@@ -92,9 +93,21 @@ public class CrewRecruitFactory {
         return firstName + " " + lastName;
     }
 
+    private String randomUniqueFullName(Set<String> usedNames) {
+        String fullName;
+        do {
+            fullName = randomFullName();
+        } while (!usedNames.add(fullName));
+
+        return fullName;
+    }
+
     private CrewMember createRecruit(String fullName) {
         RoleTemplate template = ROLE_TEMPLATES.get(random.nextInt(ROLE_TEMPLATES.size()));
+        return createRecruit(fullName, template);
+    }
 
+    private CrewMember createRecruit(String fullName, RoleTemplate template) {
         int maxHp = template.maxHp() + random.nextInt(21) - 10;
         int salary = template.salary() + random.nextInt(21) - 10;
         int piloting = tweakSkill(template.piloting());

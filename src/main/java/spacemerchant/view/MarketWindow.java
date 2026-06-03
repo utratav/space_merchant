@@ -11,8 +11,10 @@ import spacemerchant.service.MarketService;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class MarketWindow extends BasicWindow {
+    private static final Pattern AMOUNT_PATTERN = Pattern.compile("\\d*");
 
     private GuiManager guiManager;
     private Ship ship;
@@ -65,9 +67,16 @@ public class MarketWindow extends BasicWindow {
             itemPanel.addComponent(new Label(item.getName() + " (" + item.getWeight() + "t)"));
             itemPanel.addComponent(new Label(String.format("Cena: %.2f cr", buyPrice)));
 
-            itemPanel.addComponent(new Button("Kup 1 szt.", () -> {
+            TextBox amountBox = createAmountBox();
+            Panel amountPanel = new Panel(new GridLayout(2));
+            amountPanel.addComponent(new Label("Ilość:"));
+            amountPanel.addComponent(amountBox);
+            itemPanel.addComponent(amountPanel);
+
+            itemPanel.addComponent(new Button("Kup wskazaną ilość", () -> {
                 try {
-                    marketService.buyItem(ship, item, 1, currentLocation);
+                    int amount = readAmount(amountBox);
+                    marketService.buyItem(ship, item, amount, currentLocation);
                     errorMessage = ""; // Czyszczenie błędu po udanej transakcji
                     refreshUI();
                 } catch (RuntimeException e) {
@@ -95,9 +104,16 @@ public class MarketWindow extends BasicWindow {
                 itemPanel.addComponent(new Label(item.getName() + " x" + amount));
                 itemPanel.addComponent(new Label(String.format("Skup: %.2f cr", sellPrice)));
 
-                itemPanel.addComponent(new Button("Sprzedaj 1 szt.", () -> {
+                TextBox amountBox = createAmountBox();
+                Panel amountPanel = new Panel(new GridLayout(2));
+                amountPanel.addComponent(new Label("Ilość:"));
+                amountPanel.addComponent(amountBox);
+                itemPanel.addComponent(amountPanel);
+
+                itemPanel.addComponent(new Button("Sprzedaj wskazaną ilość", () -> {
                     try {
-                        marketService.sellItem(ship, item, 1, currentLocation);
+                        int amountToSell = readAmount(amountBox);
+                        marketService.sellItem(ship, item, amountToSell, currentLocation);
                         errorMessage = "";
                         refreshUI();
                     } catch (RuntimeException e) {
@@ -126,5 +142,26 @@ public class MarketWindow extends BasicWindow {
 
         // Podpinamy wygenerowany ekran
         this.setComponent(rootPanel);
+    }
+
+    private TextBox createAmountBox() {
+        return new TextBox(new TerminalSize(6, 1), "1")
+                .setValidationPattern(AMOUNT_PATTERN)
+                .setHorizontalFocusSwitching(true)
+                .setVerticalFocusSwitching(true);
+    }
+
+    private int readAmount(TextBox amountBox) {
+        String rawAmount = amountBox.getText().trim();
+        if (rawAmount.isEmpty()) {
+            throw new IllegalArgumentException("Podaj ilość większą od zera.");
+        }
+
+        int amount = Integer.parseInt(rawAmount);
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Podaj ilość większą od zera.");
+        }
+
+        return amount;
     }
 }

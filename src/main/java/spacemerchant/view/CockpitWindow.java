@@ -28,6 +28,11 @@ public class CockpitWindow extends BasicWindow {
         Panel rootPanel = new Panel(new GridLayout(2));
         Location currentLocation = ship.getCurrentLocation();
 
+        if (ship.isDefeated()) {
+            renderDefeatScreen();
+            return;
+        }
+
         // --- LEWY PANEL: MENU AKCJI ---
         Panel actionMenuPanel = new Panel(new GridLayout(1));
 
@@ -110,6 +115,18 @@ public class CockpitWindow extends BasicWindow {
         rootPanel.addComponent(statusPanel.withBorder(Borders.singleLine("STATUS POKŁADOWY")));
 
         this.setComponent(rootPanel);
+    }
+
+    private void renderDefeatScreen() {
+        Panel rootPanel = new Panel(new GridLayout(1));
+        rootPanel.addComponent(new Label("KONIEC GRY"));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Label(ship.getDefeatReason()));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Label("Statek zostal utracony. Wczytaj zapis albo rozpocznij nowa gre."));
+        rootPanel.addComponent(new EmptySpace());
+        rootPanel.addComponent(new Button("Wyjście z gry", this::close));
+        this.setComponent(rootPanel.withBorder(Borders.singleLine("RAPORT KONCOWY")));
     }
 
     private void saveAndExit() {

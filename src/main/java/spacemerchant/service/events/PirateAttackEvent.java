@@ -4,14 +4,23 @@ import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.Ship;
+import spacemerchant.service.CrewService;
 
 public class PirateAttackEvent implements EncounterEvent {
 
     @Override
     public void trigger(Ship ship, GuiManager guiManager) {
         // Podsumowanie statystyk załogi potrzebnych do podjęcia decyzji
-        int totalCombat = ship.getCrew().stream().mapToInt(CrewMember::getCombat).sum();
-        int totalPiloting = ship.getCrew().stream().mapToInt(CrewMember::getPiloting).sum();
+        int totalCombat = ship.getCrew().stream()
+                .filter(member -> member.getHp() > 0)
+                .mapToInt(CrewMember::getCombat)
+                .sum();
+        int totalPiloting = ship.getCrew().stream()
+                .filter(member -> member.getHp() > 0)
+                .mapToInt(CrewMember::getPiloting)
+                .sum();
+        boolean hasPilot = ship.getCrew().stream()
+                .anyMatch(member -> member.getHp() > 0 && CrewService.ROLE_PILOT.equalsIgnoreCase(member.getRole()));
 
         BasicWindow eventWindow = new BasicWindow("ALERT SYSTEMOWY: Atak Piratów!");
         Panel mainPanel = new Panel(new GridLayout(1));
@@ -37,8 +46,8 @@ public class PirateAttackEvent implements EncounterEvent {
         });
 
         // --- OPCJA 2: UCIECZKA ---
-        Button fleeBtn = new Button("2. Próba ucieczki (Wymaga min. 5 Pilotażu)", () -> {
-            if (totalPiloting >= 5) {
+        Button fleeBtn = new Button("2. Próba ucieczki (Wymaga pilota i min. 5 Pilotażu)", () -> {
+            if (hasPilot && totalPiloting >= 5) {
                 showResult(eventWindow, guiManager, "Ucieczka udana! Pilot wymanewrował wroga i odskoczył.");
             } else {
                 ship.setCurrentHp(ship.getCurrentHp() - 15);
