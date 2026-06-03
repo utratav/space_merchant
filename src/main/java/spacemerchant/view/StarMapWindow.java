@@ -10,6 +10,7 @@ import spacemerchant.service.NavigationService;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,17 +33,19 @@ public class StarMapWindow extends BasicWindow {
 
     private void refreshUI() {
         Location currentLoc = ship.getCurrentLocation();
+        Map<Location, Character> routeMarkers = buildRouteMarkers(currentLoc);
         Panel rootPanel = new Panel(new GridLayout(1));
 
         // Górny panel informacyjny
         Panel headerPanel = new Panel(new GridLayout(1));
         headerPanel.addComponent(new Label(String.format("Dostępne paliwo: %.2f j.", ship.getCurrentFuel())));
         headerPanel.addComponent(new Label("Obecny sektor: " + (currentLoc != null ? currentLoc.getName() : "Lot w toku...")));
+        headerPanel.addComponent(new Label("Wybierz skok po literze z mapy: [A], [B], [C]..."));
         rootPanel.addComponent(headerPanel.withBorder(Borders.singleLine("STATUS NAWIGACJI")));
         rootPanel.addComponent(new EmptySpace());
 
         Panel contentPanel = new Panel(new GridLayout(2));
-        contentPanel.addComponent(createMapPanel(currentLoc).withBorder(Borders.singleLine("MAPA SZLAKÓW")));
+        contentPanel.addComponent(createMapPanel(currentLoc, routeMarkers).withBorder(Borders.singleLine("MAPA SZLAKÓW 2.0")));
 
         // Panel dostępnych szlaków
         Panel destinationsPanel = new Panel(new GridLayout(1));
@@ -56,12 +59,14 @@ public class StarMapWindow extends BasicWindow {
                 for (Map.Entry<Location, Double> entry : paths.entrySet()) {
                     Location destination = entry.getKey();
                     Double fuelCost = entry.getValue();
+                    char routeMarker = routeMarkers.getOrDefault(destination, '?');
                     String destinationType = destination.hasStation() ? "STACJA" : "PUNKT SZLAKU";
 
                     Panel pathPanel = new Panel(new GridLayout(2));
-                    pathPanel.addComponent(new Label(destination.getName() + " [" + destinationType + "] - " + destination.getEconomy()));
+                    pathPanel.addComponent(new Label("[" + routeMarker + "] " + destination.getName()
+                            + " [" + destinationType + "] - " + destination.getEconomy()));
 
-                    Button jumpButton = new Button(String.format("Skok (%.1f paliwa)", fuelCost), () -> {
+                    Button jumpButton = new Button(String.format("Skok [%s] (%.1f paliwa)", routeMarker, fuelCost), () -> {
                         try {
                             navigationService.travel(ship, destination, guiManager);
                             this.close();
@@ -100,21 +105,31 @@ public class StarMapWindow extends BasicWindow {
         this.setComponent(rootPanel);
     }
 
-    private Panel createMapPanel(Location currentLoc) {
+    private Panel createMapPanel(Location currentLoc, Map<Location, Character> routeMarkers) {
         Panel mapPanel = new Panel(new GridLayout(1));
-        char[][] map = renderUniverseMap(currentLoc);
+        char[][] map = renderUniverseMap(currentLoc, routeMarkers);
 
         for (char[] row : map) {
             mapPanel.addComponent(new Label(new String(row)));
         }
 
         mapPanel.addComponent(new EmptySpace());
-        mapPanel.addComponent(new Label("@ statek  * dostepny skok"));
-        mapPanel.addComponent(new Label("O stacja  o punkt szlaku"));
+        mapPanel.addComponent(new Label("@ statek | A/B/C cele z listy"));
+        mapPanel.addComponent(new Label("O stacja | o punkt szlaku | + skrzyzowanie"));
+        mapPanel.addComponent(new EmptySpace());
+        mapPanel.addComponent(new Label("--- CELE W ZASIEGU ---"));
+        if (routeMarkers.isEmpty()) {
+            mapPanel.addComponent(new Label("Brak aktywnych tras z tego sektora."));
+        } else {
+            for (Map.Entry<Location, Character> entry : routeMarkers.entrySet()) {
+                Location location = entry.getKey();
+                mapPanel.addComponent(new Label("[" + entry.getValue() + "] " + location.getName()));
+            }
+        }
         return mapPanel;
     }
 
-    private char[][] renderUniverseMap(Location currentLoc) {
+    private char[][] renderUniverseMap(Location currentLoc, Map<Location, Character> routeMarkers) {
         List<Location> locations = UniverseData.getLocations();
         int minX = locations.stream().mapToInt(Location::getX).min().orElse(0);
         int maxX = locations.stream().mapToInt(Location::getX).max().orElse(0);
@@ -154,6 +169,8 @@ public class StarMapWindow extends BasicWindow {
             StarMapPoint point = points.get(location);
             if (location.equals(currentLoc)) {
                 map[point.y()][point.x()] = '@';
+            } else if (routeMarkers.containsKey(location)) {
+                map[point.y()][point.x()] = routeMarkers.get(location);
             } else if (reachableNow.contains(location)) {
                 map[point.y()][point.x()] = '*';
             } else {
@@ -162,6 +179,29 @@ public class StarMapWindow extends BasicWindow {
         }
 
         return map;
+    }
+
+    private Map<Location, Character> buildRouteMarkers(Location currentLoc) {
+        Map<Location, Character> routeMarkers = new LinkedHashMap<>();
+        if (currentLoc == null) {
+            return routeMarkers;
+        }
+
+        int index = 0;
+        for (Location destination : currentLoc.getConnectedPaths().keySet()) {
+            routeMarkers.put(destination, routeMarker(index));
+            index++;
+        }
+
+        return routeMarkers;
+    }
+
+    private char routeMarker(int index) {
+        if (index < 26) {
+            return (char) ('A' + index);
+        }
+
+        return (char) ('0' + (index - 26) % 10);
     }
 
     private void drawConnection(char[][] map, StarMapPoint start, StarMapPoint end) {

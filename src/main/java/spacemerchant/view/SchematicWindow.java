@@ -1,5 +1,6 @@
 package spacemerchant.view;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Button;
@@ -9,6 +10,7 @@ import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.Panel;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.Ship;
+import spacemerchant.service.CrewService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,48 +20,87 @@ public class SchematicWindow extends BasicWindow {
     public SchematicWindow(Ship ship) {
         super("Space Merchant - Schemat Statku");
 
-        Panel rootPanel = new Panel(new GridLayout(2));
+        Panel rootPanel = new Panel(new GridLayout(1));
+
+        Panel headerPanel = new Panel(new GridLayout(2));
+        headerPanel.addComponent(new Label("STATEK: " + ship.getName()));
+        headerPanel.addComponent(new Label("MODEL: " + (ship.getShipModel() != null ? ship.getShipModel().getName() : "Nieznany")));
+        rootPanel.addComponent(headerPanel.withBorder(Borders.singleLine("SKAN TECHNICZNY 2.0")));
+        rootPanel.addComponent(new EmptySpace());
+
+        Panel bodyPanel = new Panel(new GridLayout(2));
 
         Panel schematicPanel = new Panel(new GridLayout(1));
+        schematicPanel.setPreferredSize(new TerminalSize(48, 20));
+        schematicPanel.addComponent(new Label("Widok kadluba / rozmieszczenie stanowisk"));
+        schematicPanel.addComponent(new EmptySpace());
         for (String line : buildSchematic(ship)) {
             schematicPanel.addComponent(new Label(line));
         }
 
-        Panel legendPanel = new Panel(new GridLayout(1));
-        legendPanel.addComponent(new Label("Statek: " + ship.getName()));
+        Panel diagnosticsPanel = new Panel(new GridLayout(1));
         if (ship.getShipModel() != null) {
-            legendPanel.addComponent(new Label("Model: " + ship.getShipModel().getDescription()));
+            diagnosticsPanel.addComponent(new Label(ship.getShipModel().getDescription()));
+            diagnosticsPanel.addComponent(new EmptySpace());
         }
-        legendPanel.addComponent(new Label("Kadlub: " + ship.getCurrentHp() + "/" + ship.getMaxHp()));
-        legendPanel.addComponent(new Label(String.format("Ladownia: %.1f/%.1f t",
-                ship.getCargo().getTotalWeight(), ship.getMaxCargoWeight())));
-        legendPanel.addComponent(new Label(String.format("Paliwo: %.1f/%.1f j.",
-                ship.getCurrentFuel(), ship.getMaxFuel())));
-        legendPanel.addComponent(new EmptySpace());
+        diagnosticsPanel.addComponent(createStatusPanel(ship).withBorder(Borders.singleLine("PARAMETRY")));
+        diagnosticsPanel.addComponent(new EmptySpace());
+        diagnosticsPanel.addComponent(createSystemsPanel(ship).withBorder(Borders.singleLine("SYSTEMY")));
+        diagnosticsPanel.addComponent(new EmptySpace());
+        diagnosticsPanel.addComponent(createCrewPanel(ship).withBorder(Borders.singleLine("POKLAD ZALOGI")));
+        diagnosticsPanel.addComponent(new EmptySpace());
+        diagnosticsPanel.addComponent(new Button("Wroc do kokpitu", this::close));
 
-        legendPanel.addComponent(new Label("--- ZALOGA ---"));
+        bodyPanel.addComponent(schematicPanel.withBorder(Borders.singleLine("RZUT Z GORY")));
+        bodyPanel.addComponent(diagnosticsPanel.withBorder(Borders.singleLine("DIAGNOSTYKA")));
+        rootPanel.addComponent(bodyPanel);
+
+        this.setComponent(rootPanel);
+    }
+
+    private Panel createStatusPanel(Ship ship) {
+        Panel statusPanel = new Panel(new GridLayout(1));
+        statusPanel.addComponent(new Label("Kadlub:  " + UIUtils.drawProgressBar(ship.getCurrentHp(), ship.getMaxHp(), 18)
+                + " " + ship.getCurrentHp() + "/" + ship.getMaxHp()));
+        statusPanel.addComponent(new Label("Paliwo:  " + UIUtils.drawProgressBar((int) ship.getCurrentFuel(), (int) ship.getMaxFuel(), 18)
+                + " " + String.format("%.1f/%.1f", ship.getCurrentFuel(), ship.getMaxFuel())));
+        statusPanel.addComponent(new Label("Ladownia:" + UIUtils.drawProgressBar((int) ship.getCargo().getTotalWeight(), (int) ship.getMaxCargoWeight(), 18)
+                + " " + String.format("%.1f/%.1f t", ship.getCargo().getTotalWeight(), ship.getMaxCargoWeight())));
+        return statusPanel;
+    }
+
+    private Panel createCrewPanel(Ship ship) {
+        Panel crewPanel = new Panel(new GridLayout(1));
         if (ship.getCrew().isEmpty()) {
-            legendPanel.addComponent(new Label("Brak zalogi na pokladzie."));
+            crewPanel.addComponent(new Label("Brak zalogi na pokladzie."));
         } else {
             for (int i = 0; i < ship.getCrew().size(); i++) {
                 CrewMember member = ship.getCrew().get(i);
-                legendPanel.addComponent(new Label("C" + (i + 1) + " - " + member.getName()
-                        + " (" + member.getRole() + ")"));
+                String status = member.getHp() > 0 ? "OK" : "KRYTYCZNY";
+                crewPanel.addComponent(new Label("C" + (i + 1) + " [" + status + "] " + member.getName()
+                        + " (" + member.getRole() + ") HP " + member.getHp() + "/" + member.getMaxHp()));
+                crewPanel.addComponent(new Label("   PIL " + member.getPiloting()
+                        + " | WAL " + member.getCombat()
+                        + " | ENG " + member.getEngineering()
+                        + " | HAN " + member.getTrade()));
             }
         }
+        return crewPanel;
+    }
 
-        legendPanel.addComponent(new EmptySpace());
-        legendPanel.addComponent(new Label("--- MODULY ---"));
-        legendPanel.addComponent(new Label(moduleDescription("H+", hasHullUpgrade(ship), "wzmocniony kadlub")));
-        legendPanel.addComponent(new Label(moduleDescription("F+", hasFuelUpgrade(ship), "ulepszone zbiorniki")));
-        legendPanel.addComponent(new Label(moduleDescription("L+", hasCargoUpgrade(ship), "powiekszona ladownia")));
-        legendPanel.addComponent(new EmptySpace());
-        legendPanel.addComponent(new Button("Wroc do kokpitu", this::close));
-
-        rootPanel.addComponent(schematicPanel.withBorder(Borders.singleLine("RZUT Z GORY")));
-        rootPanel.addComponent(legendPanel.withBorder(Borders.singleLine("ZNACZNIKI")));
-
-        this.setComponent(rootPanel);
+    private Panel createSystemsPanel(Ship ship) {
+        Panel systemsPanel = new Panel(new GridLayout(1));
+        systemsPanel.addComponent(new Label(systemLine("Mostek", hasLivingPilot(ship), "wymaga zywego pilota")));
+        systemsPanel.addComponent(new Label(systemLine("Napęd", ship.getCurrentFuel() > 0, "paliwo w zbiornikach")));
+        systemsPanel.addComponent(new Label(systemLine("Ładownia", ship.getCargo().getTotalWeight() <= ship.getMaxCargoWeight(), "limit masy")));
+        systemsPanel.addComponent(new EmptySpace());
+        systemsPanel.addComponent(new Label(moduleDescription("H+", hasHullUpgrade(ship), "wzmocniony kadlub")));
+        systemsPanel.addComponent(new Label(moduleDescription("F+", hasFuelUpgrade(ship), "ulepszone zbiorniki")));
+        systemsPanel.addComponent(new Label(moduleDescription("L+", hasCargoUpgrade(ship), "powiekszona ladownia")));
+        systemsPanel.addComponent(new EmptySpace());
+        systemsPanel.addComponent(new Label("Kody na rysunku: C1.. zaloga, H/F/L moduly."));
+        systemsPanel.addComponent(new Label("XX na pokladzie oznacza czlonka zalogi poza walka."));
+        return systemsPanel;
     }
 
     private List<String> buildSchematic(Ship ship) {
@@ -122,7 +163,15 @@ public class SchematicWindow extends BasicWindow {
         if (index >= ship.getCrew().size()) {
             return "--";
         }
+        if (ship.getCrew().get(index).getHp() <= 0) {
+            return "XX";
+        }
         return "C" + (index + 1);
+    }
+
+    private boolean hasLivingPilot(Ship ship) {
+        return ship.getCrew().stream()
+                .anyMatch(member -> member.getHp() > 0 && CrewService.ROLE_PILOT.equalsIgnoreCase(member.getRole()));
     }
 
     private boolean hasHullUpgrade(Ship ship) {
@@ -139,5 +188,9 @@ public class SchematicWindow extends BasicWindow {
 
     private String moduleDescription(String marker, boolean installed, String name) {
         return marker + " - " + name + ": " + (installed ? "aktywny" : "brak");
+    }
+
+    private String systemLine(String systemName, boolean online, String note) {
+        return systemName + ": " + (online ? "ONLINE" : "OFFLINE") + " (" + note + ")";
     }
 }

@@ -1,9 +1,9 @@
 {
   "shipModelId" : "starter_shuttle",
   "shipName" : "Prometeusz",
-  "currentLocationName" : "Boja Nawigacyjna Luna",
-  "credits" : 544.0,
-  "currentFuel" : 93.0,
+  "currentLocationName" : "Europa Research",
+  "credits" : 1862.8000000000002,
+  "currentFuel" : 57.0,
   "maxFuel" : 100.0,
   "currentHp" : 100,
   "maxHp" : 100,
@@ -12,45 +12,35 @@
   "fuelPerTurn" : 1.0,
   "cargo" : [ ],
   "crew" : [ {
-    "name" : "Marta Ostrowski",
+    "name" : "Norbert Wrona",
     "role" : "Pilot",
-    "hp" : 86,
-    "maxHp" : 86,
-    "salary" : 58,
-    "piloting" : 5,
-    "combat" : 3,
+    "hp" : 92,
+    "maxHp" : 92,
+    "salary" : 46,
+    "piloting" : 4,
+    "combat" : 1,
     "engineering" : 3,
     "trade" : 2
   }, {
-    "name" : "Maciej Gorski",
-    "role" : "Negocjator",
-    "hp" : 87,
-    "maxHp" : 87,
-    "salary" : 68,
-    "piloting" : 2,
-    "combat" : 2,
-    "engineering" : 1,
-    "trade" : 5
-  }, {
-    "name" : "Iga Kowalski",
-    "role" : "Mechanik",
-    "hp" : 113,
-    "maxHp" : 113,
+    "name" : "Emil Krawczyk",
+    "role" : "Strzelec",
+    "hp" : 110,
+    "maxHp" : 110,
     "salary" : 52,
+    "piloting" : 2,
+    "combat" : 5,
+    "engineering" : 1,
+    "trade" : 2
+  }, {
+    "name" : "Pawel Maj",
+    "role" : "Nawigator",
+    "hp" : 81,
+    "maxHp" : 81,
+    "salary" : 51,
     "piloting" : 3,
     "combat" : 3,
     "engineering" : 4,
-    "trade" : 1
-  }, {
-    "name" : "Robert Chmiel",
-    "role" : "Mechanik",
-    "hp" : 107,
-    "maxHp" : 107,
-    "salary" : 61,
-    "piloting" : 3,
-    "combat" : 4,
-    "engineering" : 3,
-    "trade" : 1
+    "trade" : 2
   } ],
   "activeUpgrades" : [ ]
 }
