@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
 import spacemerchant.data.SaveManager;
 import spacemerchant.model.CrewMember;
+import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 
 public class CockpitWindow extends BasicWindow {
@@ -25,6 +26,7 @@ public class CockpitWindow extends BasicWindow {
     // Metoda przebudowująca kokpit, wywoływana za każdym razem, gdy wracasz z innego okna
     private void refreshUI() {
         Panel rootPanel = new Panel(new GridLayout(2));
+        Location currentLocation = ship.getCurrentLocation();
 
         // --- LEWY PANEL: MENU AKCJI ---
         Panel actionMenuPanel = new Panel(new GridLayout(1));
@@ -44,11 +46,17 @@ public class CockpitWindow extends BasicWindow {
             refreshUI(); // Odśwież kokpit po wyleczeniu załogi
         }));
 
-        // Nowy przycisk: Wejście na stację, żeby mieć dostęp do Giełdy i Kantyny
-        actionMenuPanel.addComponent(new Button("[4] Połącz ze Stacją Kosmiczną", () -> {
+        Button dockButton = new Button("[4] Połącz ze Stacją Kosmiczną", () -> {
             guiManager.showWindow(new StationMenuWindow(guiManager, ship));
             refreshUI(); // Odśwież kokpit po zakupach na giełdzie
-        }));
+        });
+
+        if (currentLocation == null || !currentLocation.hasStation()) {
+            dockButton.setEnabled(false);
+            dockButton.setLabel("[4] Brak stacji w tym sektorze");
+        }
+
+        actionMenuPanel.addComponent(dockButton);
 
         actionMenuPanel.addComponent(new Button("[5] Schemat Statku", () -> {
             guiManager.showWindow(new SchematicWindow(ship));
@@ -69,6 +77,8 @@ public class CockpitWindow extends BasicWindow {
         // --- PRAWY PANEL: STATUS POKŁADOWY ---
         Panel statusPanel = new Panel(new GridLayout(1));
         statusPanel.addComponent(new Label("--- STATEK: " + ship.getName() + " ---"));
+        statusPanel.addComponent(new Label("Lokacja: " + (currentLocation != null ? currentLocation.getName() : "Lot w toku")));
+        statusPanel.addComponent(new Label("Dokowanie: " + (currentLocation != null && currentLocation.hasStation() ? "dostępne" : "brak stacji")));
         statusPanel.addComponent(new Label(String.format("Kredyty: %.2f cr", ship.getCredits())));
 
         String hpBar = UIUtils.drawProgressBar((int) ship.getCurrentHp(), (int) ship.getMaxHp(), 20);

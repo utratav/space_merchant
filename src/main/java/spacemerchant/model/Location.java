@@ -1,6 +1,6 @@
 package spacemerchant.model;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Location {
@@ -19,7 +19,7 @@ public class Location {
         this.y = y;
         this.economy = economy;
         this.hasStation = hasStation;
-        this.connectedPaths = new HashMap<>();
+        this.connectedPaths = new LinkedHashMap<>();
     }
 
     // Metoda do budowania szlaku

@@ -1,6 +1,7 @@
 package spacemerchant.service;
 
 import spacemerchant.controller.GuiManager;
+import spacemerchant.exception.NotEnoughFuelException;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import spacemerchant.service.events.EncounterEvent;
@@ -18,15 +19,18 @@ public class NavigationService {
         this.random = new Random();
     }
 
-    // Dodano GuiManager do parametrów metody!
+    public void travel(Ship ship, Location destination) {
+        travel(ship, destination, null);
+    }
+
     public void travel(Ship ship, Location destination, GuiManager guiManager) {
         double cost = ship.getCurrentLocation().getConnectedPaths().getOrDefault(destination, -1.0);
 
         if (cost < 0) {
-            throw new RuntimeException("Brak bezpośredniego szlaku do tego systemu!");
+            throw new IllegalArgumentException("Brak szlaku do tego systemu!");
         }
         if (ship.getCurrentFuel() < cost) {
-            throw new RuntimeException("Za mało paliwa na ten skok!");
+            throw new NotEnoughFuelException("Za mało paliwa na ten skok!");
         }
 
         // Logika biznesowa: Opłaty, spalanie paliwa i zmiana lokacji
@@ -36,7 +40,7 @@ public class NavigationService {
 
         // --- MECHANIKA ZDARZEŃ LOSOWYCH ---
         // Generujemy 35% szansy na napotkanie zdarzenia po drodze
-        if (random.nextDouble() < 0.35) {
+        if (guiManager != null && random.nextDouble() < 0.35) {
             // W przyszłości można tu wylosować event z całej listy. Na razie dajemy Piratów.
             EncounterEvent randomEvent = new PirateAttackEvent();
 
