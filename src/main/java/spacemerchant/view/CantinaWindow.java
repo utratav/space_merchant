@@ -4,29 +4,28 @@ import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.Ship;
+import spacemerchant.service.CrewRecruitFactory;
 import spacemerchant.service.CrewService;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class CantinaWindow extends BasicWindow {
+    private static final int RECRUITS_AVAILABLE_AT_ONCE = 6;
+
     private GuiManager guiManager;
     private Ship ship;
     private CrewService crewService;
+    private CrewRecruitFactory crewRecruitFactory;
     private String errorMessage = "";
-
-    // Tymczasowa lista dostępnych najemników na stacji
-    private List<CrewMember> availableRecruits = Arrays.asList(
-            new CrewMember("Han", "Pilot", 100, 50, 5, 3, 1, 2),
-            new CrewMember("Chewie", "Inżynier", 150, 70, 3, 4, 5, 1),
-            new CrewMember("Lando", "Handlarz", 80, 100, 4, 2, 1, 5)
-    );
+    private List<CrewMember> availableRecruits;
 
     public CantinaWindow(GuiManager guiManager, Ship ship) {
         super("Kantyna - Werbunek Najemników");
         this.guiManager = guiManager;
         this.ship = ship;
         this.crewService = new CrewService();
+        this.crewRecruitFactory = new CrewRecruitFactory();
+        this.availableRecruits = crewRecruitFactory.generateRecruitPool(RECRUITS_AVAILABLE_AT_ONCE);
 
         refreshUI();
     }
@@ -56,6 +55,7 @@ public class CantinaWindow extends BasicWindow {
             Button recruitBtn = new Button(String.format("Zwerbuj (%.2f cr)", recruitCost), () -> {
                 try {
                     crewService.recruitMember(ship, recruit, recruitCost);
+                    availableRecruits.remove(recruit);
                     errorMessage = "";
                     refreshUI();
                 } catch (RuntimeException e) {
