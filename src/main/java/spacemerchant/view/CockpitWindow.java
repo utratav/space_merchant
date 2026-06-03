@@ -2,17 +2,21 @@ package spacemerchant.view;
 
 import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
+import spacemerchant.data.SaveManager;
 import spacemerchant.model.CrewMember;
 import spacemerchant.model.Ship;
 
 public class CockpitWindow extends BasicWindow {
     private GuiManager guiManager;
     private Ship ship;
+    private SaveManager saveManager;
+    private String message = "";
 
     public CockpitWindow(GuiManager guiManager, Ship ship) {
         super("Space Merchant - Kokpit");
         this.guiManager = guiManager;
         this.ship = ship;
+        this.saveManager = new SaveManager();
 
         // Budujemy interfejs po raz pierwszy
         refreshUI();
@@ -52,7 +56,13 @@ public class CockpitWindow extends BasicWindow {
         }));
 
         actionMenuPanel.addComponent(new EmptySpace());
+        actionMenuPanel.addComponent(new Button("Zapisz i wyjdź", this::saveAndExit));
         actionMenuPanel.addComponent(new Button("Wyjście z gry", this::close));
+
+        if (!message.isEmpty()) {
+            actionMenuPanel.addComponent(new EmptySpace());
+            actionMenuPanel.addComponent(new Label(message));
+        }
 
         rootPanel.addComponent(actionMenuPanel.withBorder(Borders.singleLine("WYBIERZ AKCJĘ")));
 
@@ -87,5 +97,15 @@ public class CockpitWindow extends BasicWindow {
         rootPanel.addComponent(statusPanel.withBorder(Borders.singleLine("STATUS POKŁADOWY")));
 
         this.setComponent(rootPanel);
+    }
+
+    private void saveAndExit() {
+        try {
+            saveManager.saveGame(ship);
+            this.close();
+        } catch (RuntimeException e) {
+            message = e.getMessage();
+            refreshUI();
+        }
     }
 }

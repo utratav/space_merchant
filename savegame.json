@@ -1,0 +1,56 @@
+{
+  "shipModelId" : "starter_shuttle",
+  "shipName" : "Prometeusz",
+  "currentLocationName" : "Orbita Ziemi",
+  "credits" : 600.0,
+  "currentFuel" : 100.0,
+  "maxFuel" : 100.0,
+  "currentHp" : 100,
+  "maxHp" : 100,
+  "maxCargoWeight" : 50.0,
+  "maxCrew" : 4,
+  "fuelPerTurn" : 1.0,
+  "cargo" : [ ],
+  "crew" : [ {
+    "name" : "Han",
+    "role" : "Pilot",
+    "hp" : 100,
+    "maxHp" : 100,
+    "salary" : 50,
+    "piloting" : 5,
+    "combat" : 3,
+    "engineering" : 1,
+    "trade" : 2
+  }, {
+    "name" : "Han",
+    "role" : "Pilot",
+    "hp" : 100,
+    "maxHp" : 100,
+    "salary" : 50,
+    "piloting" : 5,
+    "combat" : 3,
+    "engineering" : 1,
+    "trade" : 2
+  }, {
+    "name" : "Han",
+    "role" : "Pilot",
+    "hp" : 100,
+    "maxHp" : 100,
+    "salary" : 50,
+    "piloting" : 5,
+    "combat" : 3,
+    "engineering" : 1,
+    "trade" : 2
+  }, {
+    "name" : "Han",
+    "role" : "Pilot",
+    "hp" : 100,
+    "maxHp" : 100,
+    "salary" : 50,
+    "piloting" : 5,
+    "combat" : 3,
+    "engineering" : 1,
+    "trade" : 2
+  } ],
+  "activeUpgrades" : [ ]
+}
