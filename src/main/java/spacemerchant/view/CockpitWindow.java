@@ -46,6 +46,11 @@ public class CockpitWindow extends BasicWindow {
             refreshUI(); // Odśwież kokpit po zakupach na giełdzie
         }));
 
+        actionMenuPanel.addComponent(new Button("[5] Schemat Statku", () -> {
+            guiManager.showWindow(new SchematicWindow(ship));
+            refreshUI(); // Odśwież kokpit po obejrzeniu schematu statku
+        }));
+
         actionMenuPanel.addComponent(new EmptySpace());
         actionMenuPanel.addComponent(new Button("Wyjście z gry", this::close));
 

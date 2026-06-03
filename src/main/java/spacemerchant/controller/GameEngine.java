@@ -1,9 +1,7 @@
 package spacemerchant.controller;
 
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Window;
+import spacemerchant.data.ShipData;
 import spacemerchant.model.EconomyType;
-import spacemerchant.model.Item;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import spacemerchant.view.CockpitWindow;
@@ -12,7 +10,6 @@ public class GameEngine {
     private GuiManager guiManager;
     private Ship playerShip;
     private Location startingLocation;
-    private Item testItem;
 
     public GameEngine() {
 
@@ -23,13 +20,12 @@ public class GameEngine {
         Location Mars = new Location("Mars", 10, 10, EconomyType.MINING, true);
         this.startingLocation.addPath(Mars, 15.0);
 
-        this.testItem = new Item("WOD", "Woda", 10.0, 1.0);
-        this.playerShip = new Ship("Prometeusz", 1000.0, 100.0, 50.0, startingLocation, 100, 4, 1.0);
+        this.playerShip = new Ship(ShipData.getStartingModel(), 1000.0, startingLocation);
     }
 
     public void start() {
 
         guiManager.showWindow(new CockpitWindow(guiManager, playerShip));
-        guiManager.stop();;
+        guiManager.stop();
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Ship {
+    private ShipModel shipModel;
     private String name;
     private double credits;
     private double currentFuel;
@@ -19,19 +20,17 @@ public class Ship {
     private List<CrewMember> crew;
 
     public Ship(String name, double credits, double maxFuel, double maxCargoWeight, Location currentLocation, int maxHp, int maxCrew, double fuelPerTurn) {
-        this.name = name;
-        this.credits = credits;
-        this.maxFuel = maxFuel;
-        this.currentFuel = maxFuel;
-        this.maxCargoWeight = maxCargoWeight;
-        this.currentLocation = currentLocation;
-        this.cargo = new Inventory();
-        this.maxHp = maxHp;
-        this.currentHp = maxHp;
-        this.maxCrew = maxCrew;
-        this.fuelPerTurn = fuelPerTurn;
+        this(new ShipModel("custom", name, "Niestandardowy model statku.", 0.0, maxHp,
+                maxFuel, maxCargoWeight, maxCrew, fuelPerTurn, List.of()), credits, currentLocation);
+    }
+
+    public Ship(ShipModel shipModel, double credits, Location currentLocation) {
         this.activeUpgrades = new ArrayList<>();
         this.crew = new ArrayList<>();
+        this.cargo = new Inventory();
+        this.credits = credits;
+        this.currentLocation = currentLocation;
+        applyShipModel(shipModel);
     }
 
     public boolean hasEnoughCredits(double amount) {
@@ -44,6 +43,27 @@ public class Ship {
 
     public void addUpgrade(ShipUpgrade upgrade) {
         this.activeUpgrades.add(upgrade);
+    }
+
+    public void applyShipModel(ShipModel shipModel) {
+        if (shipModel == null) {
+            throw new IllegalArgumentException("Model statku nie moze byc pusty.");
+        }
+
+        this.shipModel = shipModel;
+        this.name = shipModel.getName();
+        this.maxHp = shipModel.getMaxHp();
+        this.currentHp = shipModel.getMaxHp();
+        this.maxFuel = shipModel.getMaxFuel();
+        this.currentFuel = shipModel.getMaxFuel();
+        this.maxCargoWeight = shipModel.getMaxCargoWeight();
+        this.maxCrew = shipModel.getMaxCrew();
+        this.fuelPerTurn = shipModel.getFuelPerTurn();
+        this.activeUpgrades.clear();
+    }
+
+    public ShipModel getShipModel() {
+        return shipModel;
     }
 
     public List<ShipUpgrade> getActiveUpgrades() {
