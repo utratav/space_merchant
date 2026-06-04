@@ -1,8 +1,8 @@
 {
   "shipModelId" : "starter_shuttle",
-  "shipName" : "Prometeusz",
+  "shipName" : "Szpont",
   "currentLocationName" : "Orbita Ziemi",
-  "credits" : 942.0,
+  "credits" : 100000.0,
   "currentFuel" : 100.0,
   "maxFuel" : 100.0,
   "currentHp" : 100,
