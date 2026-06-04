@@ -1,6 +1,11 @@
 package spacemerchant.model;
 
 public class CrewMember {
+    private static final int MAX_SKILL = 5;
+    private static final int EXPERIENCE_PER_SKILL_UP = 100;
+    private static final int MIN_SALARY = 20;
+    private static final int MAX_SALARY = 30;
+
     private String name;
     private String role;
     private int hp;
@@ -10,17 +15,25 @@ public class CrewMember {
     private int combat;
     private int engineering;
     private int trade;
+    private int pilotingExperience;
+    private int combatExperience;
+    private int engineeringExperience;
+    private int tradeExperience;
 
     public CrewMember(String name, String role, int maxHp, int salary, int piloting, int combat, int engineering, int trade) {
         this.name = name;
         this.role = role;
         this.maxHp = maxHp;
         this.hp = maxHp;
-        this.salary = salary;
+        setSalary(salary);
         this.piloting = piloting;
         this.combat = combat;
         this.engineering = engineering;
         this.trade = trade;
+        this.pilotingExperience = 0;
+        this.combatExperience = 0;
+        this.engineeringExperience = 0;
+        this.tradeExperience = 0;
     }
 
     public String getName() {
@@ -69,7 +82,7 @@ public class CrewMember {
     }
 
     public void setSalary(int salary) {
-        this.salary = salary;
+        this.salary = Math.max(MIN_SALARY, Math.min(MAX_SALARY, salary));
     }
 
     public int getPiloting() {
@@ -77,7 +90,7 @@ public class CrewMember {
     }
 
     public void setPiloting(int piloting) {
-        this.piloting = piloting;
+        this.piloting = clampSkill(piloting);
     }
 
     public int getCombat() {
@@ -85,7 +98,7 @@ public class CrewMember {
     }
 
     public void setCombat(int combat) {
-        this.combat = combat;
+        this.combat = clampSkill(combat);
     }
 
     public int getEngineering() {
@@ -93,7 +106,7 @@ public class CrewMember {
     }
 
     public void setEngineering(int engineering) {
-        this.engineering = engineering;
+        this.engineering = clampSkill(engineering);
     }
 
     public int getTrade() {
@@ -101,6 +114,67 @@ public class CrewMember {
     }
 
     public void setTrade(int trade) {
-        this.trade = trade;
+        this.trade = clampSkill(trade);
+    }
+
+    public int getExperience(CrewSkill skill) {
+        return switch (skill) {
+            case PILOTING -> pilotingExperience;
+            case COMBAT -> combatExperience;
+            case ENGINEERING -> engineeringExperience;
+            case TRADE -> tradeExperience;
+        };
+    }
+
+    public void setExperience(CrewSkill skill, int experience) {
+        int safeExperience = Math.max(0, experience);
+        switch (skill) {
+            case PILOTING -> pilotingExperience = safeExperience;
+            case COMBAT -> combatExperience = safeExperience;
+            case ENGINEERING -> engineeringExperience = safeExperience;
+            case TRADE -> tradeExperience = safeExperience;
+        }
+    }
+
+    public void addExperience(CrewSkill skill, int amount) {
+        if (amount <= 0 || getSkillValue(skill) >= MAX_SKILL) {
+            return;
+        }
+
+        setExperience(skill, getExperience(skill) + amount);
+        while (getExperience(skill) >= EXPERIENCE_PER_SKILL_UP && getSkillValue(skill) < MAX_SKILL) {
+            setExperience(skill, getExperience(skill) - EXPERIENCE_PER_SKILL_UP);
+            increaseSkill(skill);
+        }
+    }
+
+    public void increaseSkill(CrewSkill skill) {
+        switch (skill) {
+            case PILOTING -> setPiloting(piloting + 1);
+            case COMBAT -> setCombat(combat + 1);
+            case ENGINEERING -> setEngineering(engineering + 1);
+            case TRADE -> setTrade(trade + 1);
+        }
+
+        if (getSkillValue(skill) >= MAX_SKILL) {
+            setExperience(skill, 0);
+        }
+    }
+
+    public int getSkillValue(CrewSkill skill) {
+        return switch (skill) {
+            case PILOTING -> piloting;
+            case COMBAT -> combat;
+            case ENGINEERING -> engineering;
+            case TRADE -> trade;
+        };
+    }
+
+    public boolean canImprove(CrewSkill skill) {
+        return getSkillValue(skill) < MAX_SKILL;
+    }
+
+    private int clampSkill(int value) {
+        return Math.max(1, Math.min(MAX_SKILL, value));
     }
 }

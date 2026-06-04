@@ -5,6 +5,7 @@ import spacemerchant.model.Ship;
 import spacemerchant.model.ShipUpgrade;
 
 public class UpgradeService {
+    private final CrewService crewService = new CrewService();
 
     public void installUpgrade(Ship ship, ShipUpgrade upgrade) {
         // Sprawdzenie funduszy
@@ -33,5 +34,7 @@ public class UpgradeService {
         if (upgrade.getCargoBonus() > 0) {
             ship.setMaxCargoWeight(ship.getMaxCargoWeight() + upgrade.getCargoBonus());
         }
+
+        crewService.grantEngineeringExperience(ship, 30);
     }
 }

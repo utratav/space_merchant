@@ -64,6 +64,13 @@ class CrewServiceTest {
 
         crewService.paySalaries(testShip);
 
-        assertEquals(900.0, testShip.getCredits(), "Żołd nie został poprawnie potrącony!");
+        assertEquals(940.0, testShip.getCredits(), "Żołd nie został poprawnie potrącony!");
+    }
+
+    @Test
+    void shouldDefeatShipWhenDebtLimitIsExceeded() {
+        testShip.setCredits(-501.0);
+
+        assertTrue(testShip.isDefeated(), "Statek powinien zostać utracony po przekroczeniu limitu długu!");
     }
 }

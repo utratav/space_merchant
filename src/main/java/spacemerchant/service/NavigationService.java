@@ -1,6 +1,8 @@
 package spacemerchant.service;
 
 import spacemerchant.controller.GuiManager;
+import spacemerchant.exception.NotEnoughFuelException;
+import spacemerchant.exception.ShipDestroyedException;
 import spacemerchant.model.Location;
 import spacemerchant.model.Ship;
 import spacemerchant.service.events.EncounterEvent;
@@ -18,30 +20,51 @@ public class NavigationService {
         this.random = new Random();
     }
 
-    // Dodano GuiManager do parametrów metody!
+    public void travel(Ship ship, Location destination) {
+        travel(ship, destination, null);
+    }
+
     public void travel(Ship ship, Location destination, GuiManager guiManager) {
+        validatePilotReady(ship);
+
         double cost = ship.getCurrentLocation().getConnectedPaths().getOrDefault(destination, -1.0);
 
         if (cost < 0) {
-            throw new RuntimeException("Brak bezpośredniego szlaku do tego systemu!");
+            throw new IllegalArgumentException("Brak szlaku do tego systemu!");
         }
         if (ship.getCurrentFuel() < cost) {
-            throw new RuntimeException("Za mało paliwa na ten skok!");
+            throw new NotEnoughFuelException("Za mało paliwa na ten skok!");
         }
 
         // Logika biznesowa: Opłaty, spalanie paliwa i zmiana lokacji
         crewService.paySalaries(ship);
         ship.setCurrentFuel(ship.getCurrentFuel() - cost);
         ship.setCurrentLocation(destination);
+        crewService.grantPilotingExperience(ship, 25);
 
         // --- MECHANIKA ZDARZEŃ LOSOWYCH ---
         // Generujemy 35% szansy na napotkanie zdarzenia po drodze
-        if (random.nextDouble() < 0.35) {
+        if (guiManager != null && random.nextDouble() < 0.35) {
             // W przyszłości można tu wylosować event z całej listy. Na razie dajemy Piratów.
             EncounterEvent randomEvent = new PirateAttackEvent();
 
             // Wrzucamy okno awaryjne na ekran
             guiManager.showWindow(new EncounterDialog(guiManager, ship, randomEvent));
         }
+    }
+
+    private void validatePilotReady(Ship ship) {
+        if (crewService.hasLivingCrewWithRole(ship, CrewService.ROLE_PILOT)) {
+            return;
+        }
+
+        Location currentLocation = ship.getCurrentLocation();
+        if (currentLocation != null && currentLocation.hasStation()) {
+            throw new IllegalStateException("Brak żywego pilota na pokładzie. Zwerbuj pilota w kantynie.");
+        }
+
+        String defeatReason = "Statek dryfuje poza stacją bez żywego pilota. Załoga nie jest w stanie wykonać skoku.";
+        ship.markDefeated(defeatReason);
+        throw new ShipDestroyedException(defeatReason);
     }
 }

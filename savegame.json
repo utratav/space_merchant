@@ -1,0 +1,33 @@
+{
+  "shipModelId" : "starter_shuttle",
+  "shipName" : "Prometeusz",
+  "currentLocationName" : "Orbita Ziemi",
+  "credits" : 942.0,
+  "currentFuel" : 100.0,
+  "maxFuel" : 100.0,
+  "currentHp" : 100,
+  "maxHp" : 100,
+  "maxCargoWeight" : 50.0,
+  "maxCrew" : 4,
+  "fuelPerTurn" : 1.0,
+  "victorious" : false,
+  "victoryReason" : "",
+  "visitedLocationNames" : [ "Orbita Ziemi" ],
+  "cargo" : [ ],
+  "crew" : [ {
+    "name" : "Milena Falkowski",
+    "role" : "Pilot",
+    "hp" : 102,
+    "maxHp" : 102,
+    "salary" : 29,
+    "piloting" : 5,
+    "combat" : 2,
+    "engineering" : 1,
+    "trade" : 1,
+    "pilotingExperience" : 0,
+    "combatExperience" : 0,
+    "engineeringExperience" : 0,
+    "tradeExperience" : 0
+  } ],
+  "activeUpgrades" : [ ]
+}

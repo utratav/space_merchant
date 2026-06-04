@@ -43,6 +43,18 @@ public class StationMenuWindow extends BasicWindow {
             guiManager.showWindow(new CantinaWindow(guiManager, ship));
         }));
 
+        servicesPanel.addComponent(new Button("[4] Port Paliwowy (Tankowanie)", () -> {
+            guiManager.showWindow(new RefuelWindow(ship));
+        }));
+
+        servicesPanel.addComponent(new Button("[5] Warsztat Kadłuba (Naprawa)", () -> {
+            guiManager.showWindow(new HullRepairWindow(ship));
+        }));
+
+        servicesPanel.addComponent(new Button("[6] Ambulatorium i Trening Załogi", () -> {
+            guiManager.showWindow(new CrewManagementWindow(guiManager, ship));
+        }));
+
         mainPanel.addComponent(servicesPanel.withBorder(Borders.singleLine("DOSTĘPNE USŁUGI PORTOWE")));
         mainPanel.addComponent(new EmptySpace());
 

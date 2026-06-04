@@ -1,9 +1,13 @@
 package spacemerchant.view;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import spacemerchant.controller.GuiManager;
+import spacemerchant.data.ShipData;
 import spacemerchant.model.Ship;
+import spacemerchant.model.ShipModel;
 import spacemerchant.model.ShipUpgrade;
+import spacemerchant.service.ShipService;
 import spacemerchant.service.UpgradeService;
 
 import java.util.Arrays;
@@ -13,6 +17,7 @@ public class ShipyardWindow extends BasicWindow {
     private GuiManager guiManager;
     private Ship ship;
     private UpgradeService upgradeService;
+    private ShipService shipService;
     private String errorMessage = "";
 
     // Tymczasowa lista dostępnych modułów statku
@@ -27,19 +32,58 @@ public class ShipyardWindow extends BasicWindow {
         this.guiManager = guiManager;
         this.ship = ship;
         this.upgradeService = new UpgradeService();
+        this.shipService = new ShipService();
 
         refreshUI();
     }
 
     private void refreshUI() {
         Panel rootPanel = new Panel(new GridLayout(1));
+        rootPanel.setPreferredSize(new TerminalSize(132, 42));
 
         Panel headerPanel = new Panel(new GridLayout(2));
         headerPanel.addComponent(new Label(String.format("Kredyty: %.2f cr", ship.getCredits())));
+        headerPanel.addComponent(new Label("Model: " + ship.getName()));
         headerPanel.addComponent(new Label("Kadłub (HP): " + ship.getCurrentHp() + "/" + ship.getMaxHp()));
         headerPanel.addComponent(new Label("Poj. Ładowni: " + ship.getMaxCargoWeight() + " t"));
         headerPanel.addComponent(new Label("Poj. Paliwa: " + ship.getMaxFuel() + " j."));
+        headerPanel.addComponent(new Label("Miejsca załogi: " + ship.getCrew().size() + "/" + ship.getMaxCrew()));
         rootPanel.addComponent(headerPanel.withBorder(Borders.singleLine("OBECNE PARAMETRY STATKU")));
+        rootPanel.addComponent(new EmptySpace());
+
+        Panel shipModelsPanel = new Panel(new GridLayout(2));
+        for (ShipModel model : ShipData.getAvailableModels()) {
+            Panel card = new Panel(new GridLayout(1));
+            card.addComponent(new Label(model.getName()));
+            card.addComponent(new Label(model.getDescription()));
+            card.addComponent(new Label(String.format("Cena: %.2f cr", model.getPrice())));
+            card.addComponent(new Label("HP: " + model.getMaxHp()
+                    + " | Paliwo: " + model.getMaxFuel()
+                    + " | Ladownia: " + model.getMaxCargoWeight() + " t"));
+            card.addComponent(new Label("Zaloga: " + model.getMaxCrew()
+                    + " | Spalanie: " + model.getFuelPerTurn()));
+
+            Button buyShipButton = new Button("Kup i przesiadz sie", () -> {
+                try {
+                    shipService.buyShipModel(ship, model);
+                    errorMessage = "Przesiadka zakonczona. Ulepszenia starego kadluba zostaly zdemontowane.";
+                    refreshUI();
+                } catch (RuntimeException e) {
+                    errorMessage = e.getMessage();
+                    refreshUI();
+                }
+            });
+
+            if (shipService.isCurrentModel(ship, model)) {
+                buyShipButton.setEnabled(false);
+                buyShipButton.setLabel("Obecny statek");
+            }
+
+            card.addComponent(buyShipButton);
+            shipModelsPanel.addComponent(card.withBorder(Borders.singleLine()));
+        }
+
+        rootPanel.addComponent(shipModelsPanel.withBorder(Borders.singleLine("DOSTEPNE KADLUBY")));
         rootPanel.addComponent(new EmptySpace());
 
         Panel upgradesPanel = new Panel(new GridLayout(1));
